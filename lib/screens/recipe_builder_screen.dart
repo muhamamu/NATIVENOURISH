@@ -122,23 +122,23 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryOrange.withValues(alpha: 0.1),
+                      color: AppColors.primaryAccent.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.3)),
+                      border: Border.all(color: AppColors.primaryAccent.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.lock_rounded, size: 14, color: AppColors.primaryOrange),
+                            Icon(Icons.lock_rounded, size: 14, color: AppColors.primaryAccent),
                             SizedBox(width: 6),
                             Text('Computed Calories:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                           ],
                         ),
                         Text(
                           '${computedCals.round()} kcal',
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryOrange),
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.primaryAccent),
                         ),
                       ],
                     ),
@@ -179,7 +179,7 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryAccent),
                 onPressed: () {
                   final name = _ingNameCtrl.text.trim();
                   if (name.isNotEmpty) {
@@ -227,7 +227,7 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryAccent),
             onPressed: () {
               final step = _stepCtrl.text.trim();
               if (step.isNotEmpty) {
@@ -325,21 +325,21 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.lock_rounded, size: 12, color: AppColors.primaryOrange),
+                            Icon(Icons.lock_rounded, size: 12, color: AppColors.primaryAccent),
                             SizedBox(width: 4),
                             Text('ATWATER CERTIFIED NUTRITION', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 0.8)),
                           ],
                         ),
-                        Text('$_servingsCount servings', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryOrange)),
+                        Text('$_servingsCount servings', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryAccent)),
                       ],
                     ),
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildMacroBadge('${_calsPerServing.round()}', 'kcal/serv', AppColors.primaryOrange),
+                        _buildMacroBadge('${_calsPerServing.round()}', 'kcal/serv', AppColors.primaryAccent),
                         _buildMacroBadge('${_proteinPerServing.toStringAsFixed(1)}g', 'Protein', AppColors.accentGreen),
                         _buildMacroBadge('${_carbsPerServing.toStringAsFixed(1)}g', 'Carbs', AppColors.accentBlue),
                         _buildMacroBadge('${_fatPerServing.toStringAsFixed(1)}g', 'Fat', AppColors.accentAmber),
@@ -455,8 +455,8 @@ class _RecipeBuilderScreenState extends State<RecipeBuilderScreen> {
                       margin: const EdgeInsets.only(bottom: 8),
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundColor: AppColors.primaryOrange.withValues(alpha: 0.15),
-                          child: Text('${index + 1}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryOrange, fontSize: 12)),
+                          backgroundColor: AppColors.primaryAccent.withValues(alpha: 0.15),
+                          child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryAccent, fontSize: 12)),
                         ),
                         title: Text(ing.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                         subtitle: Text(

@@ -16,7 +16,6 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _unitController = TextEditingController(text: '1 portion (250g)');
-  final TextEditingController _caloriesController = TextEditingController();
   final TextEditingController _proteinController = TextEditingController();
   final TextEditingController _carbsController = TextEditingController();
   final TextEditingController _fatController = TextEditingController();
@@ -33,6 +32,21 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
   ];
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _unitController.dispose();
+    _proteinController.dispose();
+    _carbsController.dispose();
+    _fatController.dispose();
+    super.dispose();
+  }
+
+  double get _p => double.tryParse(_proteinController.text) ?? 0.0;
+  double get _c => double.tryParse(_carbsController.text) ?? 0.0;
+  double get _f => double.tryParse(_fatController.text) ?? 0.0;
+  double get _computedCalories => (_p * 4.0) + (_c * 4.0) + (_f * 9.0);
+
+  @override
   Widget build(BuildContext context) {
     final foodProvider = Provider.of<FoodProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -46,24 +60,25 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
         backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkCardBg : AppColors.lightCardHeader,
-                borderRadius: BorderRadius.circular(16),
+                color: isDark ? AppColors.darkCardBg : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.admin_panel_settings_rounded, color: AppColors.darkGreenAccent),
+                  Icon(Icons.admin_panel_settings_rounded, color: AppColors.accentGreen),
                   SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Add custom West African foods and nutritional composition data to the SQLite database.',
-                      style: TextStyle(fontSize: 12),
+                      'Manage and expand verified West African foods & nutritional values in the local SQLite database. Calories are strictly calculated via the Atwater equation.',
+                      style: TextStyle(fontSize: 12, height: 1.4),
                     ),
                   ),
                 ],
@@ -80,18 +95,34 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Add New Dish', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Add Food Composition Entry', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryAccent.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              '${_computedCalories.round()} kcal',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.primaryAccent),
+                            ),
+                          ),
+                        ],
+                      ),
                       const SizedBox(height: 16),
 
                       TextFormField(
                         controller: _nameController,
-                        decoration: const InputDecoration(labelText: 'Dish Name (e.g., Kilishi, Banga Soup)'),
+                        decoration: const InputDecoration(labelText: 'Dish Name (e.g. Kilishi, Banga Soup)'),
                         validator: (v) => (v == null || v.isEmpty) ? 'Enter dish name' : null,
                       ),
                       const SizedBox(height: 12),
 
                       DropdownButtonFormField<String>(
-                        value: _selectedCategory,
+                        initialValue: _selectedCategory,
                         decoration: const InputDecoration(labelText: 'Category'),
                         items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                         onChanged: (v) {
@@ -105,48 +136,32 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
                         decoration: const InputDecoration(labelText: 'Serving Portion Unit (e.g. 1 plate, 1 wrap)'),
                         validator: (v) => (v == null || v.isEmpty) ? 'Enter serving unit' : null,
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
 
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _caloriesController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Calories (kcal)'),
-                              validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _proteinController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Protein (g)'),
-                            ),
-                          ),
-                        ],
+                      TextFormField(
+                        controller: _proteinController,
+                        onChanged: (_) => setState(() {}),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: const InputDecoration(labelText: 'Protein (g)', prefixIcon: Icon(Icons.fitness_center_rounded, color: AppColors.accentGreen)),
+                        validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
                       ),
                       const SizedBox(height: 12),
 
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _carbsController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Carbs (g)'),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: TextFormField(
-                              controller: _fatController,
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(labelText: 'Fat (g)'),
-                            ),
-                          ),
-                        ],
+                      TextFormField(
+                        controller: _carbsController,
+                        onChanged: (_) => setState(() {}),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: const InputDecoration(labelText: 'Carbs (g)', prefixIcon: Icon(Icons.grain_rounded, color: AppColors.accentBlue)),
+                        validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                      ),
+                      const SizedBox(height: 12),
+
+                      TextFormField(
+                        controller: _fatController,
+                        onChanged: (_) => setState(() {}),
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: const InputDecoration(labelText: 'Fat (g)', prefixIcon: Icon(Icons.opacity_rounded, color: AppColors.accentAmber)),
+                        validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
                       ),
 
                       const SizedBox(height: 20),
@@ -156,7 +171,7 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
                         height: 48,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange,
+                            backgroundColor: AppColors.primaryAccentDark,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                           onPressed: () {
@@ -165,23 +180,22 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
                                 name: _nameController.text.trim(),
                                 category: _selectedCategory,
                                 servingUnit: _unitController.text.trim(),
-                                calories: double.tryParse(_caloriesController.text) ?? 0.0,
-                                protein: double.tryParse(_proteinController.text) ?? 0.0,
-                                carbs: double.tryParse(_carbsController.text) ?? 0.0,
-                                fat: double.tryParse(_fatController.text) ?? 0.0,
+                                calories: _computedCalories,
+                                protein: _p,
+                                carbs: _c,
+                                fat: _f,
                                 isCustom: true,
                               );
 
                               foodProvider.addCustomFood(newFood);
 
                               _nameController.clear();
-                              _caloriesController.clear();
                               _proteinController.clear();
                               _carbsController.clear();
                               _fatController.clear();
 
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Custom West African dish saved to database!')),
+                                SnackBar(content: Text('Saved "${newFood.name}" with ${_computedCalories.round()} kcal (Atwater certified).')),
                               );
                             }
                           },
@@ -200,10 +214,16 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
             const SizedBox(height: 12),
 
             customFoods.isEmpty
-                ? const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Center(child: Text('No custom admin dishes added yet.')),
+                ? Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.darkCardBg : Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
+                    ),
+                    child: const Center(
+                      child: Text('No custom dishes added yet.', style: TextStyle(color: Colors.grey, fontSize: 13)),
                     ),
                   )
                 : ListView.builder(
@@ -215,10 +235,10 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          title: Text(food.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text('${food.category} • ${food.calories.round()} kcal'),
+                          title: Text(food.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                          subtitle: Text('${food.category} • ${food.calories.round()} kcal • ${food.servingUnit}'),
                           trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                            icon: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 20),
                             onPressed: () {
                               if (food.id != null) foodProvider.deleteCustomFood(food.id!);
                             },
@@ -227,7 +247,9 @@ class _AdminFoodScreenState extends State<AdminFoodScreen> {
                       );
                     },
                   ),
-          ),
+
+            const SizedBox(height: 30),
+          ],
         ),
       ),
     );

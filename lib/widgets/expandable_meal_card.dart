@@ -108,7 +108,7 @@ class _ExpandableMealCardState extends State<ExpandableMealCard> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: isDark ? AppColors.accentGreen : AppColors.primaryOrange,
+                          color: isDark ? AppColors.accentGreen : AppColors.primaryAccent,
                         ),
                       ),
                       Icon(
@@ -229,7 +229,7 @@ class _ExpandableMealCardState extends State<ExpandableMealCard> {
       case 'breakfast':
         return AppColors.accentAmber;
       case 'lunch':
-        return AppColors.primaryOrange;
+        return AppColors.primaryAccent;
       case 'dinner':
         return AppColors.accentPurple;
       case 'snack':

@@ -4,7 +4,7 @@ import 'food_search_screen.dart';
 import 'activity_screen.dart';
 import 'summary_screen.dart';
 import 'profile_screen.dart';
-import '../theme/app_theme.dart';
+import '../widgets/animated_pill_nav_bar.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -24,57 +24,50 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     ProfileScreen(),
   ];
 
+  final List<NavItem> _navItems = const [
+    NavItem(
+      icon: Icons.grid_view_outlined,
+      activeIcon: Icons.grid_view_rounded,
+      label: 'Dashboard',
+    ),
+    NavItem(
+      icon: Icons.restaurant_menu_outlined,
+      activeIcon: Icons.restaurant_menu_rounded,
+      label: 'Food Log',
+    ),
+    NavItem(
+      icon: Icons.directions_run_outlined,
+      activeIcon: Icons.directions_run_rounded,
+      label: 'Activity',
+    ),
+    NavItem(
+      icon: Icons.analytics_outlined,
+      activeIcon: Icons.analytics_rounded,
+      label: 'Trends',
+    ),
+    NavItem(
+      icon: Icons.person_outline_rounded,
+      activeIcon: Icons.person_rounded,
+      label: 'Profile',
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final selectedColor = isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange;
-    final unselectedColor = isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary;
-
     return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: BottomNavigationBar(
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: SafeArea(
+        child: AnimatedPillNavBar(
           currentIndex: _selectedIndex,
           onTap: (index) {
             setState(() {
               _selectedIndex = index;
             });
           },
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: selectedColor,
-          unselectedItemColor: unselectedColor,
-          showUnselectedLabels: true,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.grid_view_rounded),
-              label: 'Dashboard',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.restaurant_menu_rounded),
-              label: 'Food Log',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.directions_run_rounded),
-              label: 'Activity',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.analytics_rounded),
-              label: 'Trends',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_rounded),
-              label: 'Profile',
-            ),
-          ],
+          items: _navItems,
         ),
       ),
     );

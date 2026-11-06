@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/food_provider.dart';
-import '../providers/activity_provider.dart';
 import '../theme/app_theme.dart';
 
 class SummaryScreen extends StatelessWidget {
@@ -12,12 +12,10 @@ class SummaryScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final foodProvider = Provider.of<FoodProvider>(context);
-    final activityProvider = Provider.of<ActivityProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final target = userProvider.dailyCalorieTarget;
-    final eaten = foodProvider.todayCalories;
-    final weeklyData = activityProvider.weeklySummary;
+    final weeklySummary = foodProvider.weeklySummary;
 
     return Scaffold(
       appBar: AppBar(
@@ -26,18 +24,28 @@ class SummaryScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- TRENDS SUMMARY CARD (Inspired by health cards dark reference) ---
+            // --- TRENDS SUMMARY CARD ---
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(22),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkCardBg : AppColors.lightCardHeader,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: isDark ? AppColors.darkBorder : Colors.transparent),
+                gradient: isDark
+                    ? const LinearGradient(
+                        colors: [Color(0xFF161822), Color(0xFF1D202D)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : const LinearGradient(
+                        colors: [Colors.white, Color(0xFFF9FAFB)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                borderRadius: BorderRadius.circular(26),
+                border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,7 +69,7 @@ class SummaryScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColors.darkOrangePrimary.withOpacity(0.15) : AppColors.lightOrange.withOpacity(0.15),
+                          color: AppColors.primaryAccent.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -69,7 +77,7 @@ class SummaryScreen extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange,
+                            color: AppColors.primaryAccent,
                           ),
                         ),
                       ),
@@ -84,12 +92,13 @@ class SummaryScreen extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       crossAxisAlignment: CrossAxisAlignment.end,
-                      children: List.generate(7, (index) {
-                        final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                        double dayCal = (index == 6) ? eaten : (target * (0.85 + (index % 3) * 0.1));
-                        double heightRatio = (dayCal / (target * 1.3)).clamp(0.1, 1.0);
-
-                        final isToday = index == 6;
+                      children: List.generate(weeklySummary.length, (index) {
+                        final day = weeklySummary[index];
+                        final date = DateTime.parse(day['date'] as String);
+                        final dayCal = (day['calories'] as num).toDouble();
+                        final heightRatio = target > 0 ? (dayCal / (target * 1.3)).clamp(0.0, 1.0) : 0.0;
+                        final now = DateTime.now();
+                        final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
 
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -99,7 +108,7 @@ class SummaryScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 9,
                                 fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-                                color: isToday ? AppColors.darkGreenAccent : Colors.grey,
+                                color: isToday ? AppColors.accentGreen : Colors.grey,
                               ),
                             ),
                             const SizedBox(height: 4),
@@ -109,9 +118,9 @@ class SummaryScreen extends StatelessWidget {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: isToday
-                                      ? [AppColors.darkGreenAccent, AppColors.darkGreenAccent.withOpacity(0.7)]
+                                      ? [AppColors.accentGreen, AppColors.accentGreenLight]
                                       : (isDark
-                                          ? [AppColors.darkBlueAccent, AppColors.darkCardHeader]
+                                          ? [AppColors.accentBlue, AppColors.darkCardHeader]
                                           : [AppColors.lightBluePrimary, AppColors.lightBlueAccent]),
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
@@ -121,12 +130,12 @@ class SummaryScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              days[index],
+                              DateFormat('EEE').format(date),
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                                 color: isToday
-                                    ? (isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange)
+                                    ? AppColors.primaryAccent
                                     : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
                               ),
                             ),
@@ -149,11 +158,11 @@ class SummaryScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    _buildSummaryMacroRow('Protein', '${foodProvider.todayProtein.round()}g', '${userProvider.targetProtein.round()}g goal', AppColors.darkGreenAccent),
+                    _buildSummaryMacroRow('Protein', '${foodProvider.todayProtein.round()}g', '${userProvider.targetProtein.round()}g goal', AppColors.accentGreen),
                     const Divider(height: 24),
-                    _buildSummaryMacroRow('Carbohydrates', '${foodProvider.todayCarbs.round()}g', '${userProvider.targetCarbs.round()}g goal', isDark ? AppColors.darkBlueAccent : AppColors.lightBluePrimary),
+                    _buildSummaryMacroRow('Carbohydrates', '${foodProvider.todayCarbs.round()}g', '${userProvider.targetCarbs.round()}g goal', AppColors.accentBlue),
                     const Divider(height: 24),
-                    _buildSummaryMacroRow('Fats', '${foodProvider.todayFat.round()}g', '${userProvider.targetFat.round()}g goal', isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange),
+                    _buildSummaryMacroRow('Fats', '${foodProvider.todayFat.round()}g', '${userProvider.targetFat.round()}g goal', AppColors.accentAmber),
                   ],
                 ),
               ),
@@ -161,20 +170,20 @@ class SummaryScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // SEN322 Requirement: Evidence-Based West African Nutrition Disclaimer Note
+            // Evidence-Based Nutrition Disclaimer Note
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.darkCardBg : AppColors.lightCardHeader,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: (isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange).withOpacity(0.3)),
+                color: isDark ? AppColors.darkCardBg : Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.primaryAccent.withValues(alpha: 0.3)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline_rounded, color: isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange, size: 22),
-                  const SizedBox(width: 12),
-                  const Expanded(
+                  Icon(Icons.verified_outlined, color: AppColors.primaryAccent, size: 22),
+                  SizedBox(width: 12),
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -184,7 +193,7 @@ class SummaryScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Nutritional content for West African foods is based on standard food composition tables. Actual calorie values vary according to specific ingredients, oil quantities, and preparation methods.',
+                          'Nutritional content for regional West African foods is based on standard food composition tables. Actual calorie values vary according to specific ingredients, oil quantities, and culinary preparation methods.',
                           style: TextStyle(fontSize: 11, height: 1.4, color: Colors.grey),
                         ),
                       ],
@@ -193,6 +202,8 @@ class SummaryScreen extends StatelessWidget {
                 ],
               ),
             ),
+
+            const SizedBox(height: 30),
           ],
         ),
       ),

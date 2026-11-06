@@ -31,6 +31,12 @@ class UserProfile {
     this.dailyWaterTargetMl = 2500,
   }) : targetWeightKg = targetWeightKg ?? weightKg;
 
+  static const double poundsPerKilogram = 2.2046226218;
+
+  double get displayWeight => weightUnit == 'lbs' ? weightKg * poundsPerKilogram : weightKg;
+  double get displayTargetWeight => weightUnit == 'lbs' ? targetWeightKg * poundsPerKilogram : targetWeightKg;
+  double weightInputToKg(double value) => weightUnit == 'lbs' ? value / poundsPerKilogram : value;
+
   double get bmi {
     if (heightCm <= 0) return 22.0;
     final heightInMeters = heightCm / 100.0;

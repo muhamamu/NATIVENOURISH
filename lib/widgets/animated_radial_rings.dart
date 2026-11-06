@@ -73,15 +73,15 @@ class AnimatedRadialRings extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryOrange.withValues(alpha: 0.15),
+                      color: AppColors.primaryAccent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       '${(eatenCalories * animValue).round()} / ${targetCalories.round()}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryOrange,
+                        color: AppColors.primaryAccent,
                       ),
                     ),
                   ),
@@ -125,8 +125,8 @@ class _RadialRingsPainter extends CustomPainter {
       strokeWidth,
       calorieProgress,
       isDark ? const Color(0xFF331E12) : const Color(0xFFFFE8D6),
-      AppColors.primaryOrange,
-      AppColors.primaryOrangeLight,
+      AppColors.primaryAccent,
+      AppColors.primaryAccentLight,
     );
 
     // Ring 2 (Middle): Protein

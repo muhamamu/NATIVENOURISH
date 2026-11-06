@@ -6,6 +6,7 @@ class RecipeProvider extends ChangeNotifier {
   List<Recipe> _allRecipes = [];
   List<Recipe> _filteredRecipes = [];
   bool _isLoading = false;
+  String? _loadError;
   String _searchQuery = '';
   String _selectedCategory = 'All';
   double? _maxCaloriesFilter;
@@ -15,6 +16,7 @@ class RecipeProvider extends ChangeNotifier {
   List<Recipe> get filteredRecipes => _filteredRecipes;
   List<Recipe> get favoriteRecipes => _allRecipes.where((r) => r.isFavorite).toList();
   bool get isLoading => _isLoading;
+  String? get loadError => _loadError;
   String get searchQuery => _searchQuery;
   String get selectedCategory => _selectedCategory;
   double? get maxCaloriesFilter => _maxCaloriesFilter;
@@ -36,10 +38,17 @@ class RecipeProvider extends ChangeNotifier {
   Future<void> loadRecipes() async {
     _isLoading = true;
     notifyListeners();
-    _allRecipes = await DatabaseHelper.instance.getAllRecipes();
-    _applyFilters();
-    _isLoading = false;
-    notifyListeners();
+    _loadError = null;
+    try {
+      _allRecipes = await DatabaseHelper.instance.getAllRecipes();
+      _applyFilters();
+    } catch (error) {
+      debugPrint('Could not load recipes: $error');
+      _loadError = 'Could not load recipes. Please try again.';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   void searchRecipes(String query) {

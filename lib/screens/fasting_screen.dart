@@ -80,7 +80,7 @@ class FastingScreen extends StatelessWidget {
                             strokeWidth: 14,
                             backgroundColor: isDark ? AppColors.darkCardHeader : AppColors.lightCardHeader,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              ratio >= 1.0 ? AppColors.accentGreen : AppColors.primaryOrange,
+                              ratio >= 1.0 ? AppColors.accentGreen : AppColors.primaryAccent,
                             ),
                           ),
                         ),
@@ -93,7 +93,7 @@ class FastingScreen extends StatelessWidget {
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                                 color: isFasting
-                                    ? (ratio >= 1.0 ? AppColors.accentGreen : AppColors.primaryOrange)
+                                    ? (ratio >= 1.0 ? AppColors.accentGreen : AppColors.primaryAccent)
                                     : Colors.grey,
                               ),
                             ),
@@ -144,7 +144,7 @@ class FastingScreen extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isFasting ? Colors.redAccent : AppColors.primaryOrange,
+                        backgroundColor: isFasting ? Colors.redAccent : AppColors.primaryAccent,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       icon: Icon(isFasting ? Icons.stop_rounded : Icons.play_arrow_rounded, color: Colors.white),
@@ -182,7 +182,7 @@ class FastingScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildPhaseItem('0 - 4h', 'Blood Sugar Stabilization', 'Insulin levels begin dropping as digestion finishes.', AppColors.accentBlue),
                   _buildPhaseItem('4 - 8h', 'Glycogen Depletion', 'Body exhausts stored liver glucose and shifts fuel sources.', AppColors.accentAmber),
-                  _buildPhaseItem('8 - 12h', 'Fat Burning Activated', 'Lipolysis accelerates as fat stores convert to energy.', AppColors.primaryOrange),
+                  _buildPhaseItem('8 - 12h', 'Fat Burning Activated', 'Lipolysis accelerates as fat stores convert to energy.', AppColors.primaryAccent),
                   _buildPhaseItem('12 - 16h+', 'Ketosis & Autophagy', 'Ketone production peaks and cellular clean-up initiates.', AppColors.accentGreen),
                 ],
               ),
@@ -200,7 +200,7 @@ class FastingScreen extends StatelessWidget {
     return ChoiceChip(
       label: Text(label),
       selected: isSel,
-      selectedColor: AppColors.primaryOrange.withValues(alpha: 0.2),
+      selectedColor: AppColors.primaryAccent.withValues(alpha: 0.2),
       onSelected: (_) => provider.setPreset(hours),
     );
   }
@@ -240,7 +240,7 @@ class FastingScreen extends StatelessWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryAccent),
             onPressed: () {
               provider.endFast();
               Navigator.pop(ctx);

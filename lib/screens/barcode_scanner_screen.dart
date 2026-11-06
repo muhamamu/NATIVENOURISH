@@ -116,14 +116,14 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
               decoration: BoxDecoration(
                 color: isDark ? AppColors.darkCardBg : Colors.black87,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.5), width: 1.5),
+                border: Border.all(color: AppColors.primaryAccent.withValues(alpha: 0.5), width: 1.5),
               ),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   CustomPaint(
                     size: const Size(200, 140),
-                    painter: _BarcodeReticlePainter(color: AppColors.primaryOrange),
+                    painter: _BarcodeReticlePainter(color: AppColors.primaryAccent),
                   ),
                   AnimatedBuilder(
                     animation: _laserAnim,
@@ -135,12 +135,12 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
                         child: Container(
                           height: 2,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Colors.transparent, AppColors.primaryOrange, Colors.transparent],
+                            gradient: LinearGradient(
+                              colors: [Colors.transparent, AppColors.primaryAccent, Colors.transparent],
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: AppColors.primaryOrange.withValues(alpha: 0.8),
+                                color: AppColors.primaryAccent.withValues(alpha: 0.8),
                                 blurRadius: 8,
                                 spreadRadius: 1,
                               ),
@@ -173,9 +173,9 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
                 hintText: 'Enter UPC/EAN barcode (e.g. 8992388111013)',
-                prefixIcon: const Icon(Icons.barcode_reader, color: AppColors.primaryOrange),
+                prefixIcon: Icon(Icons.barcode_reader, color: AppColors.primaryAccent),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.search_rounded, color: AppColors.primaryOrange),
+                  icon: Icon(Icons.search_rounded, color: AppColors.primaryAccent),
                   onPressed: () => _searchBarcode(),
                 ),
               ),
@@ -202,12 +202,12 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
             const SizedBox(height: 20),
 
             if (_isSearching) ...[
-              const Center(
+              Center(
                 child: Padding(
                   padding: EdgeInsets.all(20),
                   child: Column(
                     children: [
-                      CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryOrange)),
+                      CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryAccent)),
                       SizedBox(height: 12),
                       Text('Querying OpenFoodFacts Database...', style: TextStyle(fontWeight: FontWeight.w500)),
                       SizedBox(height: 12),
@@ -308,7 +308,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Servings', style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text('${_servings.toStringAsFixed(1)}x', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryOrange)),
+                        Text('${_servings.toStringAsFixed(1)}x', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryAccent)),
                       ],
                     ),
                     Slider(
@@ -332,7 +332,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildNutrientBadge('${(_foundProduct!.calories * _servings).round()}', 'kcal', AppColors.primaryOrange),
+                          _buildNutrientBadge('${(_foundProduct!.calories * _servings).round()}', 'kcal', AppColors.primaryAccent),
                           _buildNutrientBadge('${(_foundProduct!.protein * _servings).round()}g', 'Protein', AppColors.accentGreen),
                           _buildNutrientBadge('${(_foundProduct!.carbs * _servings).round()}g', 'Carbs', AppColors.accentBlue),
                           _buildNutrientBadge('${(_foundProduct!.fat * _servings).round()}g', 'Fat', AppColors.accentAmber),
@@ -352,7 +352,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
                         return ChoiceChip(
                           label: Text(type),
                           selected: isSel,
-                          selectedColor: AppColors.primaryOrange.withValues(alpha: 0.2),
+                          selectedColor: AppColors.primaryAccent.withValues(alpha: 0.2),
                           onSelected: (val) {
                             if (val) setState(() => _mealType = type);
                           },
@@ -396,16 +396,16 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with Single
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.primaryOrange.withValues(alpha: 0.12),
+          color: AppColors.primaryAccent.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.25)),
+          border: Border.all(color: AppColors.primaryAccent.withValues(alpha: 0.25)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.qr_code_2_rounded, size: 14, color: AppColors.primaryOrange),
+            Icon(Icons.qr_code_2_rounded, size: 14, color: AppColors.primaryAccent),
             const SizedBox(width: 4),
-            Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryOrange)),
+            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryAccent)),
           ],
         ),
       ),

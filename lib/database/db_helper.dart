@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -7,26 +8,36 @@ import '../models/meal_log.dart';
 import '../models/user_profile.dart';
 import '../models/activity_log.dart';
 import '../models/recipe.dart';
+import '../models/default_recipes.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
+  static Future<Database>? _opening;
 
   DatabaseHelper._init();
 
   Future<Database> get database async {
-    if (_database != null) return _database!;
-    _database = await _initDB('native_nourish.db');
-    return _database!;
+    if (_database?.isOpen ?? false) return _database!;
+    return _opening ??= _openDatabase();
+  }
+
+  Future<Database> _openDatabase() async {
+    try {
+      _database = await _initDB('native_nourish.db').timeout(const Duration(seconds: 20));
+      return _database!;
+    } finally {
+      _opening = null;
+    }
   }
 
   Future<Database> _initDB(String filePath) async {
-    final dbPath = await getDatabasesPath();
+    final dbPath = kIsWeb ? '' : await getDatabasesPath();
     final path = join(dbPath, filePath);
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 4,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -138,6 +149,17 @@ class DatabaseHelper {
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS step_counts (
+        date TEXT PRIMARY KEY,
+        last_sensor INTEGER,
+        sensor_steps INTEGER NOT NULL DEFAULT 0,
+        manual_steps INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+
+    await db.execute('CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
+
     // Pre-populate Default User Profile
     await db.insert('user_profile', {
       'id': 1,
@@ -174,6 +196,19 @@ class DatabaseHelper {
   }
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 4) {
+    await db.execute('CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)');
+    }
+    if (oldVersion < 3) {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS step_counts (
+        date TEXT PRIMARY KEY,
+        last_sensor INTEGER,
+        sensor_steps INTEGER NOT NULL DEFAULT 0,
+        manual_steps INTEGER NOT NULL DEFAULT 0
+      )
+    ''');
+    }
     if (oldVersion < 2) {
       await db.execute('''
         CREATE TABLE IF NOT EXISTS recipes (
@@ -289,224 +324,7 @@ class DatabaseHelper {
     final count = Sqflite.firstIntValue(countRes) ?? 0;
     if (count > 0) return;
 
-    final initialRecipes = [
-      Recipe(
-        name: 'Smoky Jollof Rice with Grilled Chicken',
-        category: 'Rice & Grains',
-        prepTimeMinutes: 25,
-        cookTimeMinutes: 45,
-        defaultServings: 4,
-        caloriesPerServing: 520.0,
-        protein: 34.0,
-        carbs: 68.0,
-        fat: 14.0,
-        imageUrl: '',
-        isFavorite: true,
-        ingredients: [
-          RecipeIngredient(name: 'Long Grain Parboiled Rice', amount: 400, unit: 'g', calories: 1440, protein: 28, carbs: 320, fat: 3),
-          RecipeIngredient(name: 'Roma Tomatoes & Red Bell Pepper Blend', amount: 300, unit: 'g', calories: 95, protein: 4, carbs: 18, fat: 1),
-          RecipeIngredient(name: 'Tomato Paste', amount: 70, unit: 'g', calories: 60, protein: 3, carbs: 13, fat: 0.5),
-          RecipeIngredient(name: 'Grilled Skinless Chicken Breast', amount: 400, unit: 'g', calories: 480, protein: 96, carbs: 0, fat: 8),
-          RecipeIngredient(name: 'Vegetable / Olive Oil', amount: 2, unit: 'tbsp', calories: 240, protein: 0, carbs: 0, fat: 28),
-          RecipeIngredient(name: 'Onions, Thyme, Curry & Bay Leaves', amount: 50, unit: 'g', calories: 40, protein: 1, carbs: 8, fat: 0.2),
-        ],
-        instructions: [
-          'Blend tomatoes, scotch bonnet peppers, and onions into a smooth puree and boil down until thick.',
-          'Heat oil in a heavy Dutch oven, saute diced onions, thyme and curry powder until fragrant.',
-          'Add tomato paste and fry for 5 minutes, then stir in boiled tomato-pepper puree and rich chicken stock.',
-          'Add washed parboiled rice, season with sea salt and bay leaves. Cover tightly with foil to trap steam.',
-          'Cook on low heat for 30 minutes, allowing bottom layer to caramelize for that authentic smoky party aroma.',
-          'Serve with golden grilled spiced chicken breast and fresh cucumber slices.',
-        ],
-      ),
-      Recipe(
-        name: 'Nutrient-Dense Egusi Soup with Lean Beef',
-        category: 'Soups & Stews',
-        prepTimeMinutes: 20,
-        cookTimeMinutes: 35,
-        defaultServings: 4,
-        caloriesPerServing: 460.0,
-        protein: 38.0,
-        carbs: 14.0,
-        fat: 28.0,
-        imageUrl: '',
-        isFavorite: true,
-        ingredients: [
-          RecipeIngredient(name: 'Ground Melon Seeds (Egusi)', amount: 200, unit: 'g', calories: 840, protein: 42, carbs: 22, fat: 72),
-          RecipeIngredient(name: 'Lean Beef Cubes', amount: 350, unit: 'g', calories: 520, protein: 78, carbs: 0, fat: 22),
-          RecipeIngredient(name: 'Fresh Spinach / Ugwu Leaves', amount: 250, unit: 'g', calories: 60, protein: 7, carbs: 9, fat: 1),
-          RecipeIngredient(name: 'Smoked Mackerel Deboned', amount: 150, unit: 'g', calories: 310, protein: 32, carbs: 0, fat: 19),
-          RecipeIngredient(name: 'Palm Oil (Controlled measure)', amount: 1.5, unit: 'tbsp', calories: 180, protein: 0, carbs: 0, fat: 20),
-          RecipeIngredient(name: 'Ground Crayfish & Pepper', amount: 30, unit: 'g', calories: 50, protein: 9, carbs: 1, fat: 0.8),
-        ],
-        instructions: [
-          'Boil lean beef cubes with onions and natural bouillon until tender, reserving the concentrated broth.',
-          'Mix ground melon seeds with water and ground onions into a thick paste with small balls.',
-          'Heat measured palm oil gently, add onions and drop egusi lumps into the pot; cook undisturbed for 10 minutes to set curd texture.',
-          'Pour in beef broth and crayfish, simmer gently until soup thickens.',
-          'Fold in shredded smoked fish and chopped spinach; cook for 3 minutes to retain vibrant greens and vitamins.',
-        ],
-      ),
-      Recipe(
-        name: 'Lean Beef Suya with Spicy Kuli-Kuli Rub',
-        category: 'Proteins / Meats',
-        prepTimeMinutes: 15,
-        cookTimeMinutes: 15,
-        defaultServings: 2,
-        caloriesPerServing: 320.0,
-        protein: 42.0,
-        carbs: 8.0,
-        fat: 13.0,
-        imageUrl: '',
-        isFavorite: false,
-        ingredients: [
-          RecipeIngredient(name: 'Beef Flank / Tenderloin thinly sliced', amount: 350, unit: 'g', calories: 420, protein: 74, carbs: 0, fat: 12),
-          RecipeIngredient(name: 'Suya Yaji Spice (Roasted peanut powder, ginger, garlic, cayenne)', amount: 40, unit: 'g', calories: 180, protein: 9, carbs: 14, fat: 11),
-          RecipeIngredient(name: 'Olive Oil Brush', amount: 1, unit: 'tsp', calories: 40, protein: 0, carbs: 0, fat: 4.5),
-          RecipeIngredient(name: 'Red Onions & Tomato Slices', amount: 100, unit: 'g', calories: 40, protein: 1.5, carbs: 8, fat: 0.2),
-        ],
-        instructions: [
-          'Slice beef against the grain into ultra-thin ribbon strips.',
-          'Thread the beef onto pre-soaked wooden skewers in accordion folds.',
-          'Generously dredge both sides of skewers in authentic suya spice rub.',
-          'Preheat grill or oven broiler to high heat (220°C/425°F).',
-          'Grill for 5-7 minutes per side until charred on edges while remaining juicy.',
-          'Garnish with crisp red onion rings and sliced plum tomatoes.',
-        ],
-      ),
-      Recipe(
-        name: 'Protein-Packed Moi Moi (Steamed Bean Cakes)',
-        category: 'Breakfast / Snacks',
-        prepTimeMinutes: 25,
-        cookTimeMinutes: 40,
-        defaultServings: 3,
-        caloriesPerServing: 240.0,
-        protein: 18.0,
-        carbs: 32.0,
-        fat: 5.5,
-        imageUrl: '',
-        isFavorite: true,
-        ingredients: [
-          RecipeIngredient(name: 'Black-Eyed Peas (Hulled)', amount: 250, unit: 'g', calories: 420, protein: 30, carbs: 70, fat: 2),
-          RecipeIngredient(name: 'Boiled Egg Whites', amount: 3, unit: 'pieces', calories: 51, protein: 11, carbs: 0.6, fat: 0.2),
-          RecipeIngredient(name: 'Red Bell Pepper, Scotch Bonnet & Onion', amount: 150, unit: 'g', calories: 55, protein: 2, carbs: 11, fat: 0.5),
-          RecipeIngredient(name: 'Light Vegetable Oil', amount: 1, unit: 'tbsp', calories: 120, protein: 0, carbs: 0, fat: 14),
-          RecipeIngredient(name: 'Ground Crayfish', amount: 20, unit: 'g', calories: 40, protein: 7, carbs: 0.5, fat: 0.5),
-        ],
-        instructions: [
-          'Soak and peel skin from black-eyed peas until completely white.',
-          'Blend beans with sweet red peppers, hot pepper, and onion until silky and aerated.',
-          'Whisk batter with warm stock, ground crayfish, and oil for 5 minutes to incorporate lightness.',
-          'Divide mixture into ramekins or banana leaves, inserting egg whites into the center.',
-          'Steam in a covered pot with boiling water for 35-40 minutes until toothpick inserted comes out clean.',
-        ],
-      ),
-      Recipe(
-        name: 'Grilled Whole Tilapia with Pepper Sauce',
-        category: 'Seafood & Meals',
-        prepTimeMinutes: 15,
-        cookTimeMinutes: 25,
-        defaultServings: 2,
-        caloriesPerServing: 340.0,
-        protein: 48.0,
-        carbs: 6.0,
-        fat: 14.0,
-        imageUrl: '',
-        isFavorite: false,
-        ingredients: [
-          RecipeIngredient(name: 'Fresh Whole Tilapia cleaned & scored', amount: 500, unit: 'g', calories: 480, protein: 96, carbs: 0, fat: 10),
-          RecipeIngredient(name: 'Ginger, Garlic, Scotch Bonnet Marinade', amount: 50, unit: 'g', calories: 45, protein: 1.5, carbs: 8, fat: 0.5),
-          RecipeIngredient(name: 'Lemon Juice', amount: 2, unit: 'tbsp', calories: 15, protein: 0.2, carbs: 3, fat: 0),
-          RecipeIngredient(name: 'Olive Oil for baste', amount: 1.5, unit: 'tbsp', calories: 180, protein: 0, carbs: 0, fat: 20),
-        ],
-        instructions: [
-          'Wash tilapia thoroughly with lime and salt, making deep diagonal slits across both sides.',
-          'Blend fresh ginger, garlic, chili, lemon juice, and bouillon into a fragrant paste.',
-          'Rub marinade deeply into the slits and cavity of the fish; let rest for 20 minutes.',
-          'Grill on medium-high coals or oven broiler for 12 minutes per side until fish flakes easily and skin is crisp.',
-          'Serve with hot West African shito or fresh salsa.',
-        ],
-      ),
-      Recipe(
-        name: 'Hearty Goat Meat Pepper Soup',
-        category: 'Soups & Stews',
-        prepTimeMinutes: 15,
-        cookTimeMinutes: 50,
-        defaultServings: 3,
-        caloriesPerServing: 260.0,
-        protein: 34.0,
-        carbs: 4.0,
-        fat: 12.0,
-        imageUrl: '',
-        isFavorite: false,
-        ingredients: [
-          RecipeIngredient(name: 'Goat Meat Cuts (Skin-on lean)', amount: 400, unit: 'g', calories: 580, protein: 90, carbs: 0, fat: 22),
-          RecipeIngredient(name: 'Traditional Pepper Soup Spice Blend (Ehuru, Uda, Uziza)', amount: 25, unit: 'g', calories: 40, protein: 2, carbs: 6, fat: 1),
-          RecipeIngredient(name: 'Fresh Scent Leaves (African Basil)', amount: 30, unit: 'g', calories: 15, protein: 1, carbs: 2, fat: 0.2),
-          RecipeIngredient(name: 'Habanero / Yellow Lantern Pepper', amount: 2, unit: 'pieces', calories: 10, protein: 0.4, carbs: 2, fat: 0.1),
-        ],
-        instructions: [
-          'Rinse goat meat and transfer to soup pot with chopped onions and seasoning.',
-          'Steam in its own juices for 10 minutes, then add 5 cups of water.',
-          'Stir in toasted ground African spices (calabash nutmeg, uda pods) and crushed chili.',
-          'Simmer on medium-low for 40 minutes until goat meat is exquisitely tender.',
-          'Add fresh scent leaves in the final 2 minutes for an aromatic restorative broth.',
-        ],
-      ),
-      Recipe(
-        name: 'West African Waakye (Rice & Red Beans)',
-        category: 'Rice & Grains',
-        prepTimeMinutes: 15,
-        cookTimeMinutes: 45,
-        defaultServings: 4,
-        caloriesPerServing: 420.0,
-        protein: 16.0,
-        carbs: 76.0,
-        fat: 6.0,
-        imageUrl: '',
-        isFavorite: true,
-        ingredients: [
-          RecipeIngredient(name: 'Long Grain Rice', amount: 300, unit: 'g', calories: 1080, protein: 21, carbs: 240, fat: 2),
-          RecipeIngredient(name: 'Cowpeas / Red Beans', amount: 180, unit: 'g', calories: 480, protein: 36, carbs: 80, fat: 3),
-          RecipeIngredient(name: 'Dried Sorghum / Waakye Leaves', amount: 4, unit: 'stalks', calories: 10, protein: 0, carbs: 2, fat: 0),
-          RecipeIngredient(name: 'Coconut Oil', amount: 1, unit: 'tbsp', calories: 120, protein: 0, carbs: 0, fat: 14),
-        ],
-        instructions: [
-          'Boil red beans with dried sorghum leaf sheaths until half cooked and the water turns an iconic deep burgundy.',
-          'Discard sorghum stalks, add washed rice, salt, and coconut oil to the rich bean water.',
-          'Cover and simmer gently for 25 minutes until grains and beans are tender.',
-          'Fluff with fork and serve alongside boiled egg, shito pepper sauce, and avocado.',
-        ],
-      ),
-      Recipe(
-        name: 'Fresh Okra & Wild Seafood Pot',
-        category: 'Soups & Stews',
-        prepTimeMinutes: 15,
-        cookTimeMinutes: 20,
-        defaultServings: 3,
-        caloriesPerServing: 220.0,
-        protein: 26.0,
-        carbs: 12.0,
-        fat: 7.0,
-        imageUrl: '',
-        isFavorite: false,
-        ingredients: [
-          RecipeIngredient(name: 'Fresh Crisp Okra finely chopped', amount: 300, unit: 'g', calories: 100, protein: 6, carbs: 21, fat: 0.6),
-          RecipeIngredient(name: 'Jumbo Shrimp & Calamari', amount: 250, unit: 'g', calories: 230, protein: 46, carbs: 2, fat: 3),
-          RecipeIngredient(name: 'White Fish Fillet (Snapper)', amount: 200, unit: 'g', calories: 200, protein: 42, carbs: 0, fat: 2),
-          RecipeIngredient(name: 'Palm Oil', amount: 1, unit: 'tbsp', calories: 120, protein: 0, carbs: 0, fat: 14),
-          RecipeIngredient(name: 'Crayfish & Yellow Habanero', amount: 30, unit: 'g', calories: 45, protein: 8, carbs: 1, fat: 0.5),
-        ],
-        instructions: [
-          'Bring seasoned seafood broth and palm oil to a rolling boil.',
-          'Add snapper chunks, shrimp, and ground crayfish; cook gently for 5 minutes.',
-          'Stir in freshly chopped okra and minced yellow pepper; cook uncovered for 4 minutes to preserve bright green color and snappy texture.',
-          'Serve steaming hot as a standalone restorative bowl or with light oat swallow.',
-        ],
-      ),
-    ];
-
-    for (var recipe in initialRecipes) {
+    for (var recipe in DefaultRecipes.list) {
       await db.insert('recipes', recipe.toMap());
     }
   }
@@ -607,26 +425,59 @@ class DatabaseHelper {
     return maps.map((e) => ActivityLog.fromMap(e)).toList();
   }
 
-  Future<List<Map<String, dynamic>>> getWeeklyCalorieSummary() async {
+  Future<List<Map<String, dynamic>>> getWeeklyCalorieSummary({DateTime? endDate}) async {
     final db = await instance.database;
-    return await db.rawQuery('''
-      SELECT logged_at as date, SUM(total_calories) as calories 
-      FROM meal_logs 
-      GROUP BY logged_at 
-      ORDER BY logged_at DESC 
-      LIMIT 7
-    ''');
+    final end = endDate ?? DateTime.now();
+    final days = List.generate(7, (index) => DateTime(end.year, end.month, end.day - 6 + index));
+    String dateKey(DateTime date) => date.toIso8601String().split('T').first;
+    final rows = await db.rawQuery('''
+      SELECT logged_at as date, SUM(total_calories) as calories
+      FROM meal_logs
+      WHERE logged_at >= ? AND logged_at <= ?
+      GROUP BY logged_at
+    ''', [dateKey(days.first), dateKey(days.last)]);
+    final totals = {for (final row in rows) row['date'] as String: row['calories']};
+    return days.map((date) => <String, dynamic>{
+      'date': dateKey(date),
+      'calories': (totals[dateKey(date)] as num?)?.toDouble() ?? 0.0,
+    }).toList();
   }
 
   // --- RECIPES DAO CRUD ---
   Future<List<Recipe>> getAllRecipes() async {
     final db = await instance.database;
-    var maps = await db.query('recipes', orderBy: 'id ASC');
-    if (maps.isEmpty) {
+    try {
+      var maps = await db.query('recipes', orderBy: 'id ASC');
+      if (maps.isEmpty) {
+        await _seedAuthenticRecipes(db);
+        maps = await db.query('recipes', orderBy: 'id ASC');
+      }
+      return maps.map((e) => Recipe.fromMap(e)).toList();
+    } catch (_) {
+      // Fallback: create table if missing and seed
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS recipes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          category TEXT NOT NULL,
+          prep_time_minutes INTEGER,
+          cook_time_minutes INTEGER,
+          default_servings INTEGER,
+          calories_per_serving REAL,
+          protein REAL,
+          carbs REAL,
+          fat REAL,
+          ingredients_json TEXT,
+          instructions_json TEXT,
+          image_url TEXT,
+          is_favorite INTEGER DEFAULT 0,
+          is_custom INTEGER DEFAULT 0
+        )
+      ''');
       await _seedAuthenticRecipes(db);
-      maps = await db.query('recipes', orderBy: 'id ASC');
+      final maps = await db.query('recipes', orderBy: 'id ASC');
+      return maps.map((e) => Recipe.fromMap(e)).toList();
     }
-    return maps.map((e) => Recipe.fromMap(e)).toList();
   }
 
   Future<List<Recipe>> searchRecipes(String query) async {
@@ -713,6 +564,19 @@ class DatabaseHelper {
     return 0.0;
   }
 
+  Future<void> reduceWaterLog(double amountMl, String dateStr) async {
+    if (!amountMl.isFinite || amountMl <= 0) return;
+    final db = await instance.database;
+    await db.transaction((txn) async {
+      final rows = await txn.rawQuery('SELECT SUM(amount_ml) AS total FROM water_logs WHERE logged_at = ?', [dateStr]);
+      final total = (rows.first['total'] as num?)?.toDouble() ?? 0.0;
+      final reduction = amountMl.clamp(0.0, total < 0 ? 0.0 : total);
+      if (reduction > 0) {
+        await txn.insert('water_logs', {'amount_ml': -reduction, 'logged_at': dateStr});
+      }
+    });
+  }
+
   Future<void> removeLastWaterEntry(String dateStr) async {
     final db = await instance.database;
     final lastRow = await db.query(
@@ -775,6 +639,28 @@ class DatabaseHelper {
     );
   }
 
+  Future<Map<String, dynamic>?> getStepCounts(String date) async {
+    final db = await instance.database;
+    final rows = await db.query('step_counts', where: 'date = ?', whereArgs: [date]);
+    return rows.isEmpty ? null : rows.first;
+  }
+
+  Future<void> saveStepCounts(Map<String, dynamic> counts) async {
+    final db = await instance.database;
+    await db.insert('step_counts', counts, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<String?> getSetting(String key) async {
+    final db = await instance.database;
+    final rows = await db.query('app_settings', where: 'key = ?', whereArgs: [key]);
+    return rows.isEmpty ? null : rows.first['value'] as String;
+  }
+
+  Future<void> setSetting(String key, String value) async {
+    final db = await instance.database;
+    await db.insert('app_settings', {'key': key, 'value': value}, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
   // --- DATABASE RESET ---
   Future<void> resetToDefaults() async {
     final db = await instance.database;
@@ -782,6 +668,7 @@ class DatabaseHelper {
     await db.delete('activity_logs');
     await db.delete('water_logs');
     await db.delete('fasting_logs');
+    await db.delete('step_counts');
     await db.delete('foods', where: 'is_custom = 1');
     await db.delete('recipes', where: 'is_custom = 1');
   }

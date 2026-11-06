@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/food_provider.dart';
+import '../providers/recipe_provider.dart';
 import '../models/food.dart';
 import '../theme/app_theme.dart';
+import '../widgets/bouncing_button.dart';
+import '../widgets/meal_success_overlay.dart';
+import '../widgets/external_animation_view.dart';
+import '../widgets/data_load_error.dart';
+import 'ai_food_scanner_screen.dart';
+import 'manual_food_entry_screen.dart';
 import 'admin_food_screen.dart';
+import 'recipe_detail_screen.dart';
 
 class FoodSearchScreen extends StatefulWidget {
   const FoodSearchScreen({super.key});
@@ -18,6 +26,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
 
   final List<String> _categories = [
     'All',
+    'Recipes 🍲',
     'Rice & Grains',
     'Soups & Stews',
     'Swallow / Tubers',
@@ -27,23 +36,58 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
   ];
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final foodProvider = Provider.of<FoodProvider>(context);
+    final recipeProvider = Provider.of<RecipeProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final isRecipesTab = _selectedCategory == 'Recipes 🍲';
     final filteredList = _selectedCategory == 'All'
         ? foodProvider.searchResults
         : foodProvider.searchResults.where((f) => f.category == _selectedCategory).toList();
+    final recipeQuery = _searchController.text.trim().toLowerCase();
+    final recipes = recipeProvider.allRecipes.where((recipe) {
+      return recipeQuery.isEmpty ||
+          recipe.name.toLowerCase().contains(recipeQuery) ||
+          recipe.category.toLowerCase().contains(recipeQuery) ||
+          recipe.ingredients.any((ingredient) => ingredient.name.toLowerCase().contains(recipeQuery));
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('West African Food Database', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text('Food Database & Diary', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         elevation: 0,
         backgroundColor: Colors.transparent,
         actions: [
           IconButton(
-            icon: const Icon(Icons.admin_panel_settings_rounded),
-            tooltip: 'Admin Add Food',
+            icon: const Icon(Icons.camera_alt_outlined),
+            tooltip: 'Food Scanner Demo',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AiFoodScannerScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline_rounded),
+            tooltip: 'Manual Food Entry',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ManualFoodEntryScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.admin_panel_settings_outlined),
+            tooltip: 'Admin Database Manager',
             onPressed: () {
               Navigator.push(
                 context,
@@ -60,33 +104,30 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
               controller: _searchController,
-              onChanged: (val) => foodProvider.searchFood(val),
+              onChanged: (val) {
+                foodProvider.searchFood(val);
+                setState(() {});
+              },
               decoration: InputDecoration(
-                hintText: 'Search Jollof, Egusi, Amala, Suya...',
-                prefixIcon: Icon(Icons.search_rounded, color: isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange),
+                hintText: 'Search foods, Jollof, Egusi, Amala, Recipes...',
+                prefixIcon: Icon(Icons.search_rounded, color: AppColors.primaryAccent),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear_rounded),
                         onPressed: () {
                           _searchController.clear();
                           foodProvider.searchFood('');
+                          setState(() {});
                         },
                       )
                     : null,
-                filled: true,
-                fillColor: isDark ? AppColors.darkCardBg : AppColors.lightCardHeader,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
           ),
 
           // Category Chips Filter
           SizedBox(
-            height: 48,
+            height: 44,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -99,10 +140,11 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                   child: FilterChip(
                     label: Text(category),
                     selected: isSelected,
-                    selectedColor: isDark ? AppColors.darkOrangePrimary : AppColors.lightBluePrimary,
+                    selectedColor: AppColors.primaryAccentDark,
                     labelStyle: TextStyle(
                       color: isSelected ? Colors.white : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontSize: 12,
                     ),
                     backgroundColor: isDark ? AppColors.darkCardBg : AppColors.lightCardHeader,
                     onSelected: (bool selected) {
@@ -118,94 +160,197 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
 
           const SizedBox(height: 8),
 
-          // Food Items List
+          // Food Items & Recipes List
           Expanded(
-            child: filteredList.isEmpty
-                ? const Center(child: Text('No West African foods found matching query.'))
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    itemCount: filteredList.length,
-                    itemBuilder: (context, index) {
-                      final food = filteredList[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 46,
-                                height: 46,
-                                decoration: BoxDecoration(
-                                  color: isDark ? AppColors.darkCardHeader : AppColors.lightCardHeader,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    _getCategoryIcon(food.category),
-                                    color: isDark ? AppColors.darkOrangePrimary : AppColors.lightBluePrimary,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: isRecipesTab
+                ? (recipeProvider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : recipeProvider.loadError != null
+                    ? DataLoadError(message: recipeProvider.loadError!, onRetry: recipeProvider.loadRecipes)
+                    : recipes.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ExternalAnimationView(
+                              assetPath: 'assets/animations/empty.json',
+                              width: 90,
+                              height: 90,
+                            ),
+                            const SizedBox(height: 12),
+                            const Text('No recipes found matching query', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        itemCount: recipes.length,
+                        itemBuilder: (context, index) {
+                          final recipe = recipes[index];
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => RecipeDetailScreen(recipe: recipe)),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(14),
+                                child: Row(
                                   children: [
-                                    Text(
-                                      food.name,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                    Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primaryAccent.withValues(alpha: 0.15),
+                                        borderRadius: BorderRadius.circular(14),
+                                      ),
+                                      child: Center(
+                                        child: Icon(Icons.menu_book_rounded, color: AppColors.primaryAccent, size: 24),
+                                      ),
                                     ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      '${food.servingUnit} • ${food.category}',
-                                      style: TextStyle(fontSize: 12, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            recipe.name,
+                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '${recipe.caloriesPerServing.round()} kcal • ${recipe.defaultServings} servings • ${recipe.category}',
+                                            style: TextStyle(fontSize: 12, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: [
-                                        _buildMacroBadge('P: ${food.protein.round()}g', AppColors.darkGreenAccent),
-                                        const SizedBox(width: 6),
-                                        _buildMacroBadge('C: ${food.carbs.round()}g', isDark ? AppColors.darkBlueAccent : AppColors.lightBluePrimary),
-                                        const SizedBox(width: 6),
-                                        _buildMacroBadge('F: ${food.fat.round()}g', isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange),
-                                      ],
-                                    ),
+                                    const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Colors.grey),
                                   ],
                                 ),
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                            ),
+                          );
+                        },
+                      ))
+                : (foodProvider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : foodProvider.loadError != null
+                    ? DataLoadError(message: foodProvider.loadError!, onRetry: foodProvider.loadInitialData)
+                    : filteredList.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ExternalAnimationView(
+                              assetPath: 'assets/animations/empty.json',
+                              width: 90,
+                              height: 90,
+                            ),
+                            const SizedBox(height: 12),
+                            const Text('No foods found matching query', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            const SizedBox(height: 8),
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.add_rounded, size: 16),
+                              label: const Text('Add as Custom Food'),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const ManualFoodEntryScreen()),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        itemCount: filteredList.length,
+                        itemBuilder: (context, index) {
+                          final food = filteredList[index];
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(14),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    '${food.calories.round()} kcal',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: isDark ? AppColors.darkGreenAccent : AppColors.lightBluePrimary,
+                                  Container(
+                                    width: 48,
+                                    height: 48,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryAccent.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        _getCategoryIcon(food.category),
+                                        color: AppColors.primaryAccent,
+                                        size: 24,
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: isDark ? AppColors.darkOrangePrimary : AppColors.lightOrange,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                      minimumSize: Size.zero,
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          food.name,
+                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${food.servingUnit} • ${food.category}',
+                                          style: TextStyle(fontSize: 12, color: isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Row(
+                                          children: [
+                                            _buildMacroBadge('P: ${food.protein.round()}g', AppColors.accentGreen),
+                                            const SizedBox(width: 6),
+                                            _buildMacroBadge('C: ${food.carbs.round()}g', AppColors.accentBlue),
+                                            const SizedBox(width: 6),
+                                            _buildMacroBadge('F: ${food.fat.round()}g', AppColors.accentAmber),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                    onPressed: () => _showLogMealDialog(context, food),
-                                    child: const Text('Log Meal', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        '${food.calories.round()} kcal',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                          color: AppColors.primaryAccent,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      BouncingButton(
+                                        onTap: () => _showLogMealDialog(context, food),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.primaryAccent,
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: const Text('Log Meal', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                            ),
+                          );
+                        },
+                      )),
           ),
         ],
       ),
@@ -216,7 +361,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -264,6 +409,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                       return ChoiceChip(
                         label: Text(type),
                         selected: isSel,
+                        selectedColor: AppColors.primaryAccent.withValues(alpha: 0.2),
                         onSelected: (val) {
                           if (val) setModalState(() => selectedMealType = type);
                         },
@@ -297,7 +443,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.darkGreenAccent.withOpacity(0.1),
+                      color: AppColors.accentGreen.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -306,7 +452,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                         const Text('Total Calories:', style: TextStyle(fontWeight: FontWeight.bold)),
                         Text(
                           '${(food.calories * selectedServings).round()} kcal',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.darkGreenAccent),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColors.accentGreen),
                         ),
                       ],
                     ),
@@ -319,7 +465,7 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                     height: 48,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.darkGreenAccent,
+                        backgroundColor: AppColors.primaryAccentDark,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),
                       onPressed: () {
@@ -329,8 +475,15 @@ class _FoodSearchScreenState extends State<FoodSearchScreen> {
                           servings: selectedServings,
                         );
                         Navigator.pop(ctx);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Logged ${food.name} (${selectedServings}x) to $selectedMealType!')),
+
+                        MealSuccessOverlay.show(
+                          context,
+                          title: food.name,
+                          mealType: selectedMealType,
+                          calories: food.calories * selectedServings,
+                          protein: food.protein * selectedServings,
+                          carbs: food.carbs * selectedServings,
+                          fat: food.fat * selectedServings,
                         );
                       },
                       child: const Text('Confirm & Log Meal', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),

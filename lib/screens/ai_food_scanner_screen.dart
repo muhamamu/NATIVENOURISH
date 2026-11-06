@@ -10,13 +10,10 @@ import '../models/food.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bouncing_button.dart';
 import '../widgets/meal_success_overlay.dart';
-import '../widgets/skeleton_loader.dart';
-import '../widgets/external_animation_view.dart';
 
 enum ScanStep {
   initial,
   photoSelected,
-  analyzing,
   resultReady,
 }
 
@@ -55,14 +52,11 @@ class AiFoodScannerScreen extends StatefulWidget {
   State<AiFoodScannerScreen> createState() => _AiFoodScannerScreenState();
 }
 
-class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTickerProviderStateMixin {
+class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> {
   final ImagePicker _picker = ImagePicker();
   XFile? _selectedImage;
   ScanStep _currentStep = ScanStep.initial;
-  String _analysisStatus = 'Initializing Vision Engine...';
 
-  late AnimationController _scannerAnimCtrl;
-  late Animation<double> _laserAnim;
 
   DetectedFoodItem? _detectedItem;
   String _selectedMealType = 'Lunch';
@@ -72,7 +66,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
   final TextEditingController _carbsCtrl = TextEditingController();
   final TextEditingController _fatCtrl = TextEditingController();
 
-  final List<DetectedFoodItem> _mockAIEstimates = [
+  final List<DetectedFoodItem> _demoMeals = [
     DetectedFoodItem(
       name: 'Jollof Rice with Grilled Chicken',
       category: 'Rice & Grains',
@@ -130,21 +124,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _scannerAnimCtrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat(reverse: true);
-
-    _laserAnim = Tween<double>(begin: 0.1, end: 0.9).animate(
-      CurvedAnimation(parent: _scannerAnimCtrl, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
   void dispose() {
-    _scannerAnimCtrl.dispose();
     _dishNameController.dispose();
     _calCtrl.dispose();
     _proteinCtrl.dispose();
@@ -174,7 +154,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
         imageQuality: 85,
       );
 
-      if (image != null) {
+      if (image != null && mounted) {
         setState(() {
           _selectedImage = image;
           _currentStep = ScanStep.photoSelected;
@@ -189,25 +169,9 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
     }
   }
 
-  Future<void> _runAiAnalysis() async {
-    setState(() {
-      _currentStep = ScanStep.analyzing;
-      _analysisStatus = 'Detecting food composition...';
-    });
-
-    await Future.delayed(const Duration(milliseconds: 700));
-    if (!mounted) return;
-    setState(() => _analysisStatus = 'Segmenting dishes & portion volumes...');
-
-    await Future.delayed(const Duration(milliseconds: 700));
-    if (!mounted) return;
-    setState(() => _analysisStatus = 'Cross-referencing nutritional database...');
-
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (!mounted) return;
-
-    // Pick best match based on file name or simulated composition
-    final item = (_mockAIEstimates..shuffle()).first;
+  Future<void> _loadDemoExample() async {
+    // This example is independent of the photo. No vision model is connected.
+    final item = _demoMeals.first;
     _detectedItem = DetectedFoodItem(
       name: item.name,
       category: item.category,
@@ -229,7 +193,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
     });
   }
 
-  void _confirmAndSave() {
+  Future<void> _confirmAndSave() async {
     if (_detectedItem == null) return;
 
     final parsedCal = double.tryParse(_calCtrl.text) ?? _detectedItem!.baseCalories;
@@ -251,22 +215,23 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
     final servings = _detectedItem!.servingMultiplier;
 
     final foodProvider = Provider.of<FoodProvider>(context, listen: false);
-    foodProvider.logMeal(
+    await foodProvider.logMeal(
       food: food,
       mealType: _selectedMealType,
       servings: servings,
     );
 
+    if (!mounted) return;
     Navigator.pop(context);
 
     MealSuccessOverlay.show(
       context,
       title: food.name,
       mealType: _selectedMealType,
-      calories: _detectedItem!.calories,
-      protein: _detectedItem!.protein,
-      carbs: _detectedItem!.carbs,
-      fat: _detectedItem!.fat,
+      calories: parsedCal * servings,
+      protein: parsedProtein * servings,
+      carbs: parsedCarbs * servings,
+      fat: parsedFat * servings,
     );
   }
 
@@ -276,7 +241,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AI Food Scanner', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text('Food Scanner Demo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         elevation: 0,
         backgroundColor: Colors.transparent,
         actions: [
@@ -300,9 +265,15 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 16),
+                child: Text(
+                  'Demo only — photos are not analyzed. The example meal is sample data; enter your actual meal details before saving.',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
               if (_currentStep == ScanStep.initial) _buildInitialCameraView(isDark),
               if (_currentStep == ScanStep.photoSelected) _buildPreviewView(isDark),
-              if (_currentStep == ScanStep.analyzing) _buildAnalyzingView(isDark),
               if (_currentStep == ScanStep.resultReady) _buildResultsView(isDark),
             ],
           ),
@@ -329,7 +300,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
               // Scanner Grid / Corner Reticles
               CustomPaint(
                 size: const Size(260, 260),
-                painter: _ViewfinderReticlePainter(color: AppColors.primaryOrange),
+                painter: _ViewfinderReticlePainter(color: AppColors.primaryAccent),
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -338,10 +309,10 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
                     width: 72,
                     height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.primaryOrange.withValues(alpha: 0.15),
+                      color: AppColors.primaryAccent.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.camera_alt_outlined, color: AppColors.primaryOrange, size: 36),
+                    child: Icon(Icons.camera_alt_outlined, color: AppColors.primaryAccent, size: 36),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -374,15 +345,15 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [AppColors.primaryOrange, AppColors.primaryOrangeLight],
+                    gradient: LinearGradient(
+                      colors: [AppColors.primaryAccentDark, AppColors.primaryAccentLight],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(18),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primaryOrange.withValues(alpha: 0.35),
+                        color: AppColors.primaryAccent.withValues(alpha: 0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -468,118 +439,15 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(50),
-                  backgroundColor: AppColors.primaryOrange,
+                  backgroundColor: AppColors.primaryAccentDark,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
                 icon: const Icon(Icons.auto_awesome_rounded, color: Colors.white),
-                label: const Text('Analyze with AI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                onPressed: _runAiAnalysis,
+                label: const Text('Load Demo Example', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                onPressed: _loadDemoExample,
               ),
             ),
           ],
-        ),
-      ],
-    );
-  }
-
-  // --- 3. ANALYZING VIEW (HUD & SCANNER LASER) ---
-  Widget _buildAnalyzingView(bool isDark) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          height: 320,
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(24),
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              if (_selectedImage != null)
-                Opacity(
-                  opacity: 0.65,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: kIsWeb
-                        ? Image.network(_selectedImage!.path, fit: BoxFit.cover, width: double.infinity, height: 320)
-                        : Image.file(File(_selectedImage!.path), fit: BoxFit.cover, width: double.infinity, height: 320),
-                  ),
-                ),
-
-              // Animated Scanning Laser Line
-              AnimatedBuilder(
-                animation: _laserAnim,
-                builder: (context, child) {
-                  return Positioned(
-                    top: 320 * _laserAnim.value,
-                    left: 20,
-                    right: 20,
-                    child: Container(
-                      height: 3,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Colors.transparent, AppColors.primaryOrange, AppColors.accentGreen, Colors.transparent],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primaryOrange.withValues(alpha: 0.8),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 24),
-
-        // Shimmering Status Bar
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkCardBg : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.lightBorder),
-          ),
-          child: Column(
-            children: [
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: ExternalAnimationView(
-                      assetPath: 'assets/animations/scanning.json',
-                      width: 24,
-                      height: 24,
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Text(
-                    'AI Model Processing',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                _analysisStatus,
-                style: const TextStyle(fontSize: 13, color: AppColors.primaryOrange, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 16),
-              const SkeletonLoader(width: double.infinity, height: 12, borderRadius: 6),
-              const SizedBox(height: 8),
-              const SkeletonLoader(width: 180, height: 12, borderRadius: 6),
-            ],
-          ),
         ),
       ],
     );
@@ -619,8 +487,8 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('AI Match Identified', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text('Review and adjust portions before saving to diary', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                        Text('Demo Example', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text('This sample was not detected from your photo', style: TextStyle(fontSize: 11, color: Colors.grey)),
                       ],
                     ),
                   ),
@@ -632,7 +500,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
               TextField(
                 controller: _dishNameController,
                 decoration: const InputDecoration(
-                  labelText: 'Detected Dish Name',
+                  labelText: 'Example Dish Name',
                   prefixIcon: Icon(Icons.restaurant_rounded),
                 ),
               ),
@@ -646,7 +514,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
                   const Text('Portion Size', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   Text(
                     '${item.servingMultiplier.toStringAsFixed(1)}x serving (${item.unit})',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryOrange),
+                    style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryAccent),
                   ),
                 ],
               ),
@@ -675,7 +543,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildMacroMetric('${item.calories.round()}', 'kcal', AppColors.primaryOrange),
+                    _buildMacroMetric('${item.calories.round()}', 'kcal', AppColors.primaryAccent),
                     _buildMacroMetric('${item.protein.round()}g', 'Protein', AppColors.accentGreen),
                     _buildMacroMetric('${item.carbs.round()}g', 'Carbs', AppColors.accentBlue),
                     _buildMacroMetric('${item.fat.round()}g', 'Fat', AppColors.accentAmber),
@@ -738,7 +606,7 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
                   return ChoiceChip(
                     label: Text(type),
                     selected: isSel,
-                    selectedColor: AppColors.primaryOrange.withValues(alpha: 0.2),
+                    selectedColor: AppColors.primaryAccent.withValues(alpha: 0.2),
                     onSelected: (val) {
                       if (val) setState(() => _selectedMealType = type);
                     },
@@ -755,18 +623,18 @@ class _AiFoodScannerScreenState extends State<AiFoodScannerScreen> with SingleTi
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: AppColors.primaryOrange.withValues(alpha: 0.1),
+            color: AppColors.primaryAccent.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.3)),
+            border: Border.all(color: AppColors.primaryAccent.withValues(alpha: 0.3)),
           ),
-          child: const Row(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.info_outline_rounded, size: 20, color: AppColors.primaryOrange),
+              Icon(Icons.info_outline_rounded, size: 20, color: AppColors.primaryAccent),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Disclaimer: AI estimates are calculated approximations based on visual portion recognition, not guaranteed clinical measurements. Adjust portions as appropriate.',
+                  'Demo only: no image analysis is performed. This sample is unrelated to your photo. Replace the dish and nutrition with your own values before saving.',
                   style: TextStyle(fontSize: 11, height: 1.4, color: Colors.grey),
                 ),
               ),

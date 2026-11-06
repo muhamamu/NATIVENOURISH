@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import '../widgets/profile_avatar.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../providers/theme_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/food_provider.dart';
+import '../providers/activity_provider.dart';
+import '../providers/recipe_provider.dart';
+import '../providers/fasting_provider.dart';
+import '../services/step_tracker_service.dart';
 import '../database/db_helper.dart';
 import '../theme/app_theme.dart';
 
@@ -15,10 +21,6 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool _breakfastReminder = true;
-  bool _lunchReminder = true;
-  bool _dinnerReminder = true;
-  bool _hydrationReminder = true;
   bool _cameraGranted = false;
 
   @override
@@ -28,7 +30,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _checkPermissions() async {
+    if (kIsWeb) return;
     final status = await Permission.camera.status;
+    if (!mounted) return;
     setState(() {
       _cameraGranted = status.isGranted;
     });
@@ -36,6 +40,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _requestCameraPermission() async {
     final result = await Permission.camera.request();
+    if (!mounted) return;
     setState(() {
       _cameraGranted = result.isGranted;
     });
@@ -62,11 +67,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      body: SingleChildScrollView(
+      body: Align(alignment: Alignment.topCenter, child: SizedBox(width: 860, child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(padding: const EdgeInsets.only(bottom: 24), child: Row(children: [
+              ProfileAvatar(profile: profile, size: 52),
+              const SizedBox(width: 14),
+              Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(profile.name, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary)),
+                const Text('Make NativeNourish feel like you', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              ])),
+            ])),
             // --- SECTION 1: APPEARANCE & THEME ---
             _buildSectionHeader('Appearance & Theme', Icons.palette_outlined),
             Card(
@@ -74,14 +87,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 children: [
                   SwitchListTile(
                     title: const Text('Dark Mode', style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: const Text('OLED obsidian palette with vibrant orange accents'),
+                    subtitle: const Text('A softer dark palette for comfortable viewing'),
                     secondary: Icon(
                       themeProvider.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
-                      color: AppColors.primaryOrange,
+                      color: AppColors.primaryAccent,
                     ),
                     value: themeProvider.isDarkMode,
                     onChanged: (val) => themeProvider.toggleTheme(val),
                   ),
+                  const Divider(height: 1),
+                  Padding(padding: const EdgeInsets.all(16), child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      const Text('App accent', style: TextStyle(fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 6),
+                      const Text('Choose a color for buttons, navigation, and highlights.', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                      const SizedBox(height: 12),
+                      Wrap(spacing: 10, runSpacing: 8, children: [
+                        for (final entry in AppColors.accentColors.entries)
+                          ChoiceChip(label: Text(entry.key),
+                            avatar: CircleAvatar(backgroundColor: entry.value, radius: 8),
+                            selected: themeProvider.accentName == entry.key,
+                            onSelected: (_) async {
+                              try { await themeProvider.setAccent(entry.key); }
+                              catch (_) { if (context.mounted) { ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Could not save appearance. Please try again.'))); } }
+                            }),
+                      ]),
+                  ])),
                 ],
               ),
             ),
@@ -156,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         return ChoiceChip(
                           label: Text(pref),
                           selected: isSel,
-                          selectedColor: AppColors.primaryOrange.withValues(alpha: 0.2),
+                          selectedColor: AppColors.primaryAccent.withValues(alpha: 0.2),
                           onSelected: (val) {
                             if (val) {
                               userProvider.updateProfile(profile.copyWith(dietaryPreference: pref));
@@ -172,42 +204,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             const SizedBox(height: 20),
 
-            // --- SECTION 4: NOTIFICATIONS & REMINDERS ---
-            _buildSectionHeader('Smart Notifications', Icons.notifications_active_outlined),
-            Card(
-              child: Column(
-                children: [
-                  SwitchListTile(
-                    title: const Text('Breakfast Logging Reminder'),
-                    subtitle: const Text('8:00 AM prompt to record your morning meal'),
-                    value: _breakfastReminder,
-                    onChanged: (val) => setState(() => _breakfastReminder = val),
-                  ),
-                  const Divider(height: 1),
-                  SwitchListTile(
-                    title: const Text('Lunch Logging Reminder'),
-                    subtitle: const Text('1:00 PM midday meal tracking reminder'),
-                    value: _lunchReminder,
-                    onChanged: (val) => setState(() => _lunchReminder = val),
-                  ),
-                  const Divider(height: 1),
-                  SwitchListTile(
-                    title: const Text('Dinner Logging Reminder'),
-                    subtitle: const Text('7:30 PM evening meal review prompt'),
-                    value: _dinnerReminder,
-                    onChanged: (val) => setState(() => _dinnerReminder = val),
-                  ),
-                  const Divider(height: 1),
-                  SwitchListTile(
-                    title: const Text('Hydration Reminder'),
-                    subtitle: const Text('Periodic reminders to drink water and reach 2.5L'),
-                    value: _hydrationReminder,
-                    onChanged: (val) => setState(() => _hydrationReminder = val),
-                  ),
-                ],
-              ),
-            ),
-
+            _buildSectionHeader('Smart Notifications', Icons.notifications_none_rounded),
+            const Card(child: ListTile(
+              leading: Icon(Icons.schedule_outlined), title: Text('Reminders coming soon'),
+              subtitle: Text('Meal and hydration reminders are not available yet. Track your daily progress from the dashboard.'),
+            )),
             const SizedBox(height: 20),
 
             // --- SECTION 5: HARDWARE & PERMISSIONS ---
@@ -218,8 +219,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ListTile(
                     leading: const Icon(Icons.camera_alt_outlined, color: AppColors.accentBlue),
                     title: const Text('Camera & Photo Access'),
-                    subtitle: Text(_cameraGranted ? 'Access Granted for AI Food Scanner' : 'Permission needed for AI food scanning'),
-                    trailing: _cameraGranted
+                    subtitle: Text(kIsWeb ? 'Your browser asks before using the camera. Photo uploads use the file picker.' : _cameraGranted ? 'Camera access granted' : 'Permission needed to take a photo'),
+                    trailing: kIsWeb ? null : _cameraGranted
                         ? const Icon(Icons.check_circle_rounded, color: AppColors.accentGreen)
                         : TextButton(
                             onPressed: _requestCameraPermission,
@@ -227,11 +228,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                   ),
                   const Divider(height: 1),
-                  const ListTile(
-                    leading: Icon(Icons.directions_walk_rounded, color: AppColors.accentGreen),
-                    title: Text('Activity & Step Sensors'),
-                    subtitle: Text('Tracks active steps & estimated caloric burn on-device'),
-                    trailing: Icon(Icons.check_circle_rounded, color: AppColors.accentGreen),
+                  ListTile(
+                    leading: const Icon(Icons.directions_walk_rounded, color: AppColors.accentGreen),
+                    title: const Text('Activity & Step Sensors'),
+                    subtitle: Text(kIsWeb ? 'Manual steps are available in the browser.' : 'Connect your device sensor from the Activity screen.'),
+                    trailing: const Icon(Icons.directions_walk_rounded, color: AppColors.accentGreen),
                   ),
                 ],
               ),
@@ -287,7 +288,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'West African Nutrition & AI Calorie Tracker',
+                    'West African Nutrition & Calorie Tracker',
                     style: TextStyle(
                       fontSize: 11,
                       color: isDark ? AppColors.darkTextMuted : AppColors.lightTextMuted,
@@ -300,7 +301,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 30),
           ],
         ),
-      ),
+      ))),
     );
   }
 
@@ -309,7 +310,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.primaryOrange),
+          Icon(icon, size: 18, color: AppColors.primaryAccent),
           const SizedBox(width: 8),
           Text(
             title,
@@ -360,9 +361,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
             onPressed: () async {
               Navigator.pop(ctx);
+              final activityProvider = context.read<ActivityProvider>();
+              final recipeProvider = context.read<RecipeProvider>();
+              final fastingProvider = context.read<FastingProvider>();
+              final stepTracker = context.read<StepTrackerService>();
               await DatabaseHelper.instance.resetToDefaults();
               await foodProvider.loadInitialData();
               await userProvider.loadUserProfile();
+              await activityProvider.loadTodayActivities();
+              await recipeProvider.loadRecipes();
+              await fastingProvider.loadActiveFast();
+              await stepTracker.resetCounts();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('All data has been reset to defaults.')),

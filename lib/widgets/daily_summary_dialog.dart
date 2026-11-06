@@ -55,10 +55,10 @@ Hydration & Movement:
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.primaryOrange.withValues(alpha: 0.15),
+                color: AppColors.primaryAccent.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.analytics_rounded, color: AppColors.primaryOrange, size: 20),
+              child: Icon(Icons.analytics_rounded, color: AppColors.primaryAccent, size: 20),
             ),
             const SizedBox(width: 10),
             const Text('Daily Nutrition Summary', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
@@ -70,7 +70,7 @@ Hydration & Movement:
             children: [
               Text(
                 foodProvider.selectedDateDisplay,
-                style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryOrange),
+                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryAccent),
               ),
               const SizedBox(height: 12),
               Container(
@@ -85,7 +85,7 @@ Hydration & Movement:
                     const SizedBox(height: 6),
                     _buildRow('Calorie Burned', '-${burned.round()} kcal', AppColors.accentGreen),
                     const Divider(height: 14),
-                    _buildRow('Net Balance', '${net.round()} kcal', AppColors.primaryOrange, isBold: true),
+                    _buildRow('Net Balance', '${net.round()} kcal', AppColors.primaryAccent, isBold: true),
                   ],
                 ),
               ),
@@ -119,7 +119,7 @@ Hydration & Movement:
             child: const Text('Close'),
           ),
           ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryAccent),
             icon: const Icon(Icons.copy_rounded, size: 16, color: Colors.white),
             label: const Text('Copy Report', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             onPressed: () {

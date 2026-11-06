@@ -121,12 +121,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryOrange.withValues(alpha: 0.15),
+                          color: AppColors.primaryAccent.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           currentRecipe.category,
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryOrange),
+                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryAccent),
                         ),
                       ),
                       Row(
@@ -152,7 +152,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildMacroBadge('${currentRecipe.caloriesPerServing.round()}', 'kcal / serv', AppColors.primaryOrange),
+                      _buildMacroBadge('${currentRecipe.caloriesPerServing.round()}', 'kcal / serv', AppColors.primaryAccent),
                       _buildMacroBadge('${currentRecipe.protein.round()}g', 'Protein', AppColors.accentGreen),
                       _buildMacroBadge('${currentRecipe.carbs.round()}g', 'Carbs', AppColors.accentBlue),
                       _buildMacroBadge('${currentRecipe.fat.round()}g', 'Fat', AppColors.accentAmber),
@@ -179,7 +179,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                   Row(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.remove_circle_outline_rounded, color: AppColors.primaryOrange),
+                        icon: Icon(Icons.remove_circle_outline_rounded, color: AppColors.primaryAccent),
                         onPressed: _servings > 1 ? () => setState(() => _servings--) : null,
                       ),
                       Text(
@@ -187,7 +187,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primaryOrange),
+                        icon: Icon(Icons.add_circle_outline_rounded, color: AppColors.primaryAccent),
                         onPressed: _servings < 12 ? () => setState(() => _servings++) : null,
                       ),
                     ],
@@ -271,13 +271,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: AppColors.primaryOrange.withValues(alpha: 0.15),
+                          color: AppColors.primaryAccent.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: Center(
                           child: Text(
                             '${index + 1}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primaryOrange),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primaryAccent),
                           ),
                         ),
                       ),
@@ -316,7 +316,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                       return ChoiceChip(
                         label: Text(type),
                         selected: isSel,
-                        selectedColor: AppColors.primaryOrange.withValues(alpha: 0.2),
+                        selectedColor: AppColors.primaryAccent.withValues(alpha: 0.2),
                         onSelected: (val) {
                           if (val) setState(() => _selectedMealType = type);
                         },

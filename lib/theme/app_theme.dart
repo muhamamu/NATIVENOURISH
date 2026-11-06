@@ -3,9 +3,14 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   // Vibrant Brand Primary & Accents
-  static const Color primaryOrange = Color(0xFFFF7700);
-  static const Color primaryOrangeLight = Color(0xFFFF9433);
-  static const Color primaryOrangeDark = Color(0xFFE65100);
+  static const Map<String, Color> accentColors = {
+    'Teal': Color(0xFF087F73), 'Blue': Color(0xFF2563EB), 'Violet': Color(0xFF7C3AED),
+  };
+  static Color accent = accentColors['Teal']!;
+  static bool isDark = true;
+  static Color get primaryAccent => isDark ? Color.lerp(accent, Colors.white, 0.38)! : accent;
+  static Color get primaryAccentLight => Color.lerp(accent, Colors.white, 0.08)!;
+  static Color get primaryAccentDark => accent;
   static const Color accentGreen = Color(0xFF10B981);
   static const Color accentGreenLight = Color(0xFF34D399);
   static const Color accentBlue = Color(0xFF38BDF8);
@@ -30,14 +35,14 @@ class AppColors {
   static const Color lightBorder = Color(0xFFE2E8F0);
   static const Color lightBluePrimary = Color(0xFF2563EB);
   static const Color lightBlueSecondary = Color(0xFF3B82F6);
-  static const Color lightOrange = Color(0xFFFF7700);
+  static Color get lightAccent => accent;
   static const Color lightGreen = Color(0xFF10B981);
   static const Color lightTextPrimary = Color(0xFF0F172A);
   static const Color lightTextSecondary = Color(0xFF64748B);
   static const Color lightTextMuted = Color(0xFF94A3B8);
 
   // Backwards compatibility aliases
-  static const Color darkOrangePrimary = primaryOrange;
+  static Color get darkAccentPrimary => primaryAccent;
   static const Color darkGreenAccent = accentGreen;
   static const Color darkBlueAccent = accentBlue;
   static const Color lightBlueAccent = Color(0xFF60A5FA);
@@ -49,8 +54,8 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.lightBg,
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.primaryOrange,
+      colorScheme: ColorScheme.light(
+        primary: AppColors.primaryAccent,
         secondary: AppColors.accentGreen,
         tertiary: AppColors.accentBlue,
         surface: AppColors.lightCardBg,
@@ -108,7 +113,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primaryOrange, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primaryAccent, width: 1.5),
         ),
         hintStyle: GoogleFonts.poppins(
           color: AppColors.lightTextMuted,
@@ -117,7 +122,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryOrange,
+          backgroundColor: AppColors.primaryAccentDark,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -130,9 +135,9 @@ class AppTheme {
           ),
         ),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.lightCardBg,
-        selectedItemColor: AppColors.primaryOrange,
+        selectedItemColor: AppColors.primaryAccent,
         unselectedItemColor: AppColors.lightTextSecondary,
         elevation: 0,
       ),
@@ -144,8 +149,9 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.darkBg,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryOrange,
+      colorScheme: ColorScheme.dark(
+        primary: AppColors.primaryAccent,
+        onPrimary: AppColors.darkBg,
         secondary: AppColors.accentGreen,
         tertiary: AppColors.accentBlue,
         surface: AppColors.darkCardBg,
@@ -203,7 +209,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primaryOrange, width: 1.5),
+          borderSide: BorderSide(color: AppColors.primaryAccent, width: 1.5),
         ),
         hintStyle: GoogleFonts.poppins(
           color: AppColors.darkTextMuted,
@@ -212,7 +218,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryOrange,
+          backgroundColor: AppColors.primaryAccentDark,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
@@ -225,9 +231,9 @@ class AppTheme {
           ),
         ),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
         backgroundColor: AppColors.darkCardBg,
-        selectedItemColor: AppColors.primaryOrange,
+        selectedItemColor: AppColors.primaryAccent,
         unselectedItemColor: AppColors.darkTextSecondary,
         elevation: 0,
       ),

@@ -63,7 +63,7 @@ class AnimatedPillNavBar extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.primaryOrange.withValues(alpha: isDark ? 0.2 : 0.12)
+                      ? AppColors.primaryAccent.withValues(alpha: isDark ? 0.2 : 0.12)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                 ),
@@ -77,7 +77,7 @@ class AnimatedPillNavBar extends StatelessWidget {
                       child: Icon(
                         isSelected ? item.activeIcon : item.icon,
                         color: isSelected
-                            ? AppColors.primaryOrange
+                            ? AppColors.primaryAccent
                             : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
                         size: 22,
                       ),
@@ -89,7 +89,7 @@ class AnimatedPillNavBar extends StatelessWidget {
                         fontSize: 10,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                         color: isSelected
-                            ? AppColors.primaryOrange
+                            ? AppColors.primaryAccent
                             : (isDark ? AppColors.darkTextSecondary : AppColors.lightTextSecondary),
                       ),
                       maxLines: 1,

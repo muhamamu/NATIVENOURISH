@@ -1,0 +1,224 @@
+[
+  {
+    "name": "Smoky Jollof Rice with Grilled Chicken",
+    "category": "Rice & Grains",
+    "prep_time_minutes": 25,
+    "cook_time_minutes": 45,
+    "default_servings": 4,
+    "calories_per_serving": 520.0,
+    "protein": 34.0,
+    "carbs": 68.0,
+    "fat": 14.0,
+    "image_url": "",
+    "is_favorite": 1,
+    "is_custom": 0,
+    "ingredients_json": [
+      {"name": "Long Grain Parboiled Rice", "amount": 400.0, "unit": "g", "calories": 1440.0, "protein": 28.0, "carbs": 320.0, "fat": 3.0},
+      {"name": "Roma Tomatoes & Red Bell Pepper Blend", "amount": 300.0, "unit": "g", "calories": 95.0, "protein": 4.0, "carbs": 18.0, "fat": 1.0},
+      {"name": "Tomato Paste", "amount": 70.0, "unit": "g", "calories": 60.0, "protein": 3.0, "carbs": 13.0, "fat": 0.5},
+      {"name": "Grilled Skinless Chicken Breast", "amount": 400.0, "unit": "g", "calories": 480.0, "protein": 96.0, "carbs": 0.0, "fat": 8.0},
+      {"name": "Vegetable / Olive Oil", "amount": 2.0, "unit": "tbsp", "calories": 240.0, "protein": 0.0, "carbs": 0.0, "fat": 28.0},
+      {"name": "Onions, Thyme, Curry & Bay Leaves", "amount": 50.0, "unit": "g", "calories": 40.0, "protein": 1.0, "carbs": 8.0, "fat": 0.2}
+    ],
+    "instructions_json": [
+      "Blend tomatoes, scotch bonnet peppers, and onions into a smooth puree and boil down until thick.",
+      "Heat oil in a heavy Dutch oven, saute diced onions, thyme and curry powder until fragrant.",
+      "Add tomato paste and fry for 5 minutes, then stir in boiled tomato-pepper puree and rich chicken stock.",
+      "Add washed parboiled rice, season with sea salt and bay leaves. Cover tightly with foil to trap steam.",
+      "Cook on low heat for 30 minutes, allowing bottom layer to caramelize for that authentic smoky party aroma.",
+      "Serve with golden grilled spiced chicken breast and fresh cucumber slices."
+    ]
+  },
+  {
+    "name": "Nutrient-Dense Egusi Soup with Lean Beef",
+    "category": "Soups & Stews",
+    "prep_time_minutes": 20,
+    "cook_time_minutes": 35,
+    "default_servings": 4,
+    "calories_per_serving": 460.0,
+    "protein": 38.0,
+    "carbs": 14.0,
+    "fat": 28.0,
+    "image_url": "",
+    "is_favorite": 1,
+    "is_custom": 0,
+    "ingredients_json": [
+      {"name": "Ground Melon Seeds (Egusi)", "amount": 200.0, "unit": "g", "calories": 840.0, "protein": 42.0, "carbs": 22.0, "fat": 72.0},
+      {"name": "Lean Beef Cubes", "amount": 350.0, "unit": "g", "calories": 520.0, "protein": 78.0, "carbs": 0.0, "fat": 22.0},
+      {"name": "Fresh Spinach / Ugwu Leaves", "amount": 250.0, "unit": "g", "calories": 60.0, "protein": 7.0, "carbs": 9.0, "fat": 1.0},
+      {"name": "Smoked Mackerel Deboned", "amount": 150.0, "unit": "g", "calories": 310.0, "protein": 32.0, "carbs": 0.0, "fat": 19.0},
+      {"name": "Palm Oil (Controlled measure)", "amount": 1.5, "unit": "tbsp", "calories": 180.0, "protein": 0.0, "carbs": 0.0, "fat": 20.0},
+      {"name": "Ground Crayfish & Pepper", "amount": 30.0, "unit": "g", "calories": 50.0, "protein": 9.0, "carbs": 1.0, "fat": 0.8}
+    ],
+    "instructions_json": [
+      "Boil lean beef cubes with onions and natural bouillon until tender, reserving the concentrated broth.",
+      "Mix ground melon seeds with water and ground onions into a thick paste with small balls.",
+      "Heat measured palm oil gently, add onions and drop egusi lumps into the pot; cook undisturbed for 10 minutes to set curd texture.",
+      "Pour in beef broth and crayfish, simmer gently until soup thickens.",
+      "Fold in shredded smoked fish and chopped spinach; cook for 3 minutes to retain vibrant greens and vitamins."
+    ]
+  },
+  {
+    "name": "Lean Beef Suya with Spicy Kuli-Kuli Rub",
+    "category": "Proteins / Meats",
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 15,
+    "default_servings": 2,
+    "calories_per_serving": 320.0,
+    "protein": 42.0,
+    "carbs": 8.0,
+    "fat": 13.0,
+    "image_url": "",
+    "is_favorite": 0,
+    "is_custom": 0,
+    "ingredients_json": [
+      {"name": "Beef Flank / Tenderloin thinly sliced", "amount": 350.0, "unit": "g", "calories": 420.0, "protein": 74.0, "carbs": 0.0, "fat": 12.0},
+      {"name": "Suya Yaji Spice (Roasted peanut powder, ginger, garlic, cayenne)", "amount": 40.0, "unit": "g", "calories": 180.0, "protein": 9.0, "carbs": 14.0, "fat": 11.0},
+      {"name": "Olive Oil Brush", "amount": 1.0, "unit": "tsp", "calories": 40.0, "protein": 0.0, "carbs": 0.0, "fat": 4.5},
+      {"name": "Red Onions & Tomato Slices", "amount": 100.0, "unit": "g", "calories": 40.0, "protein": 1.5, "carbs": 8.0, "fat": 0.2}
+    ],
+    "instructions_json": [
+      "Slice beef against the grain into ultra-thin ribbon strips.",
+      "Thread the beef onto pre-soaked wooden skewers in accordion folds.",
+      "Generously dredge both sides of skewers in authentic suya spice rub.",
+      "Preheat grill or oven broiler to high heat (220°C/425°F).",
+      "Grill for 5-7 minutes per side until charred on edges while remaining juicy.",
+      "Garnish with crisp red onion rings and sliced plum tomatoes."
+    ]
+  },
+  {
+    "name": "Protein-Packed Moi Moi (Steamed Bean Cakes)",
+    "category": "Breakfast / Snacks",
+    "prep_time_minutes": 25,
+    "cook_time_minutes": 40,
+    "default_servings": 3,
+    "calories_per_serving": 240.0,
+    "protein": 18.0,
+    "carbs": 32.0,
+    "fat": 5.5,
+    "image_url": "",
+    "is_favorite": 1,
+    "is_custom": 0,
+    "ingredients_json": [
+      {"name": "Black-Eyed Peas (Hulled)", "amount": 250.0, "unit": "g", "calories": 420.0, "protein": 30.0, "carbs": 70.0, "fat": 2.0},
+      {"name": "Boiled Egg Whites", "amount": 3.0, "unit": "pieces", "calories": 51.0, "protein": 11.0, "carbs": 0.6, "fat": 0.2},
+      {"name": "Red Bell Pepper, Scotch Bonnet & Onion", "amount": 150.0, "unit": "g", "calories": 55.0, "protein": 2.0, "carbs": 11.0, "fat": 0.5},
+      {"name": "Light Vegetable Oil", "amount": 1.0, "unit": "tbsp", "calories": 120.0, "protein": 0.0, "carbs": 0.0, "fat": 14.0},
+      {"name": "Ground Crayfish", "amount": 20.0, "unit": "g", "calories": 40.0, "protein": 7.0, "carbs": 0.5, "fat": 0.5}
+    ],
+    "instructions_json": [
+      "Soak and peel skin from black-eyed peas until completely white.",
+      "Blend beans with sweet red peppers, hot pepper, and onion until silky and aerated.",
+      "Whisk batter with warm stock, ground crayfish, and oil for 5 minutes to incorporate lightness.",
+      "Divide mixture into ramekins or banana leaves, inserting egg whites into the center.",
+      "Steam in a covered pot with boiling water for 35-40 minutes until toothpick inserted comes out clean."
+    ]
+  },
+  {
+    "name": "Grilled Whole Tilapia with Pepper Sauce",
+    "category": "Seafood & Meals",
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 25,
+    "default_servings": 2,
+    "calories_per_serving": 340.0,
+    "protein": 48.0,
+    "carbs": 6.0,
+    "fat": 14.0,
+    "image_url": "",
+    "is_favorite": 0,
+    "is_custom": 0,
+    "ingredients_json": [
+      {"name": "Fresh Whole Tilapia cleaned & scored", "amount": 500.0, "unit": "g", "calories": 480.0, "protein": 96.0, "carbs": 0.0, "fat": 10.0},
+      {"name": "Ginger, Garlic, Scotch Bonnet Marinade", "amount": 50.0, "unit": "g", "calories": 45.0, "protein": 1.5, "carbs": 8.0, "fat": 0.5},
+      {"name": "Lemon Juice", "amount": 2.0, "unit": "tbsp", "calories": 15.0, "protein": 0.2, "carbs": 3.0, "fat": 0.0},
+      {"name": "Olive Oil for baste", "amount": 1.5, "unit": "tbsp", "calories": 180.0, "protein": 0.0, "carbs": 0.0, "fat": 20.0}
+    ],
+    "instructions_json": [
+      "Wash tilapia thoroughly with lime and salt, making deep diagonal slits across both sides.",
+      "Blend fresh ginger, garlic, chili, lemon juice, and bouillon into a fragrant paste.",
+      "Rub marinade deeply into the slits and cavity of the fish; let rest for 20 minutes.",
+      "Grill on medium-high coals or oven broiler for 12 minutes per side until fish flakes easily and skin is crisp.",
+      "Serve with hot West African shito or fresh salsa."
+    ]
+  },
+  {
+    "name": "Hearty Goat Meat Pepper Soup",
+    "category": "Soups & Stews",
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 50,
+    "default_servings": 3,
+    "calories_per_serving": 260.0,
+    "protein": 34.0,
+    "carbs": 4.0,
+    "fat": 12.0,
+    "image_url": "",
+    "is_favorite": 0,
+    "is_custom": 0,
+    "ingredients_json": [
+      {"name": "Goat Meat Cuts (Skin-on lean)", "amount": 400.0, "unit": "g", "calories": 580.0, "protein": 90.0, "carbs": 0.0, "fat": 22.0},
+      {"name": "Traditional Pepper Soup Spice Blend (Ehuru, Uda, Uziza)", "amount": 25.0, "unit": "g", "calories": 40.0, "protein": 2.0, "carbs": 6.0, "fat": 1.0},
+      {"name": "Fresh Scent Leaves (African Basil)", "amount": 30.0, "unit": "g", "calories": 15.0, "protein": 1.0, "carbs": 2.0, "fat": 0.2},
+      {"name": "Habanero / Yellow Lantern Pepper", "amount": 2.0, "unit": "pieces", "calories": 10.0, "protein": 0.4, "carbs": 2.0, "fat": 0.1}
+    ],
+    "instructions_json": [
+      "Rinse goat meat and transfer to soup pot with chopped onions and seasoning.",
+      "Steam in its own juices for 10 minutes, then add 5 cups of water.",
+      "Stir in toasted ground African spices (calabash nutmeg, uda pods) and crushed chili.",
+      "Simmer on medium-low for 40 minutes until goat meat is exquisitely tender.",
+      "Add fresh scent leaves in the final 2 minutes for an aromatic restorative broth."
+    ]
+  },
+  {
+    "name": "West African Waakye (Rice & Red Beans)",
+    "category": "Rice & Grains",
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 45,
+    "default_servings": 4,
+    "calories_per_serving": 420.0,
+    "protein": 16.0,
+    "carbs": 76.0,
+    "fat": 6.0,
+    "image_url": "",
+    "is_favorite": 1,
+    "is_custom": 0,
+    "ingredients_json": [
+      {"name": "Long Grain Rice", "amount": 300.0, "unit": "g", "calories": 1080.0, "protein": 21.0, "carbs": 240.0, "fat": 2.0},
+      {"name": "Cowpeas / Red Beans", "amount": 180.0, "unit": "g", "calories": 480.0, "protein": 36.0, "carbs": 80.0, "fat": 3.0},
+      {"name": "Dried Sorghum / Waakye Leaves", "amount": 4.0, "unit": "stalks", "calories": 10.0, "protein": 0.0, "carbs": 2.0, "fat": 0.0},
+      {"name": "Coconut Oil", "amount": 1.0, "unit": "tbsp", "calories": 120.0, "protein": 0.0, "carbs": 0.0, "fat": 14.0}
+    ],
+    "instructions_json": [
+      "Boil red beans with dried sorghum leaf sheaths until half cooked and the water turns an iconic deep burgundy.",
+      "Discard sorghum stalks, add washed rice, salt, and coconut oil to the rich bean water.",
+      "Cover and simmer gently for 25 minutes until grains and beans are tender.",
+      "Fluff with fork and serve alongside boiled egg, shito pepper sauce, and avocado."
+    ]
+  },
+  {
+    "name": "Fresh Okra & Wild Seafood Pot",
+    "category": "Soups & Stews",
+    "prep_time_minutes": 15,
+    "cook_time_minutes": 20,
+    "default_servings": 3,
+    "calories_per_serving": 220.0,
+    "protein": 26.0,
+    "carbs": 12.0,
+    "fat": 7.0,
+    "image_url": "",
+    "is_favorite": 0,
+    "is_custom": 0,
+    "ingredients_json": [
+      {"name": "Fresh Crisp Okra finely chopped", "amount": 300.0, "unit": "g", "calories": 100.0, "protein": 6.0, "carbs": 21.0, "fat": 0.6},
+      {"name": "Jumbo Shrimp & Calamari", "amount": 250.0, "unit": "g", "calories": 230.0, "protein": 46.0, "carbs": 2.0, "fat": 3.0},
+      {"name": "White Fish Fillet (Snapper)", "amount": 200.0, "unit": "g", "calories": 200.0, "protein": 42.0, "carbs": 0.0, "fat": 2.0},
+      {"name": "Palm Oil", "amount": 1.0, "unit": "tbsp", "calories": 120.0, "protein": 0.0, "carbs": 0.0, "fat": 14.0},
+      {"name": "Crayfish & Yellow Habanero", "amount": 30.0, "unit": "g", "calories": 45.0, "protein": 8.0, "carbs": 1.0, "fat": 0.5}
+    ],
+    "instructions_json": [
+      "Bring seasoned seafood broth and palm oil to a rolling boil.",
+      "Add snapper chunks, shrimp, and ground crayfish; cook gently for 5 minutes.",
+      "Stir in freshly chopped okra and minced yellow pepper; cook uncovered for 4 minutes to preserve bright green color and snappy texture.",
+      "Serve steaming hot as a standalone restorative bowl or with light oat swallow."
+    ]
+  }
+]

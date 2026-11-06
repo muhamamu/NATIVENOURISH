@@ -7,6 +7,7 @@ class FastingProvider extends ChangeNotifier {
   DateTime? _startTime;
   int _targetHours = 16;
   Timer? _ticker;
+  bool _disposed = false;
   List<Map<String, dynamic>> _history = [];
 
   bool get isFasting => _isFasting;
@@ -48,18 +49,19 @@ class FastingProvider extends ChangeNotifier {
   }
 
   Future<void> loadActiveFast() async {
+    _ticker?.cancel();
     final active = await DatabaseHelper.instance.getActiveFast();
     if (active != null) {
       _isFasting = true;
       _startTime = DateTime.tryParse(active['start_time'] as String? ?? '');
       _targetHours = (active['target_hours'] as int?) ?? 16;
-      _startTicker();
+      if (!_disposed) _startTicker();
     } else {
       _isFasting = false;
       _startTime = null;
     }
     _history = await DatabaseHelper.instance.getFastingHistory();
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   void setPreset(int hours) {
@@ -97,6 +99,7 @@ class FastingProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     _ticker?.cancel();
     super.dispose();
   }

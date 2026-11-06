@@ -4,6 +4,7 @@ import '../providers/recipe_provider.dart';
 import '../models/recipe.dart';
 import '../theme/app_theme.dart';
 import '../widgets/external_animation_view.dart';
+import '../widgets/data_load_error.dart';
 import 'recipe_detail_screen.dart';
 import 'recipe_builder_screen.dart';
 
@@ -58,7 +59,7 @@ class _RecipeDiscoveryScreenState extends State<RecipeDiscoveryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Max Calories / Serving:', style: TextStyle(fontWeight: FontWeight.w600)),
-                      Text('${tempMaxCalories.round()} kcal', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryOrange)),
+                      Text('${tempMaxCalories.round()} kcal', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryAccent)),
                     ],
                   ),
                   Slider(
@@ -94,7 +95,7 @@ class _RecipeDiscoveryScreenState extends State<RecipeDiscoveryScreen> {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryOrange),
+                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryAccent),
                       onPressed: () {
                         provider.setNutrientFilters(
                           maxCalories: tempMaxCalories,
@@ -153,7 +154,7 @@ class _RecipeDiscoveryScreenState extends State<RecipeDiscoveryScreen> {
               onChanged: (val) => recipeProvider.searchRecipes(val),
               decoration: InputDecoration(
                 hintText: 'Search authentic recipes by name or ingredient...',
-                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primaryOrange),
+                prefixIcon: Icon(Icons.search_rounded, color: AppColors.primaryAccent),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear_rounded),
@@ -183,7 +184,7 @@ class _RecipeDiscoveryScreenState extends State<RecipeDiscoveryScreen> {
                   child: FilterChip(
                     label: Text(cat),
                     selected: isSelected,
-                    selectedColor: AppColors.primaryOrange,
+                    selectedColor: AppColors.primaryAccentDark,
                     labelStyle: TextStyle(
                       color: isSelected ? Colors.white : (isDark ? AppColors.darkTextPrimary : AppColors.lightTextPrimary),
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
@@ -216,7 +217,9 @@ class _RecipeDiscoveryScreenState extends State<RecipeDiscoveryScreen> {
                       ],
                     ),
                   )
-                : recipes.isEmpty
+                : recipeProvider.loadError != null
+                    ? DataLoadError(message: recipeProvider.loadError!, onRetry: recipeProvider.loadRecipes)
+                    : recipes.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -275,12 +278,12 @@ class _RecipeDiscoveryScreenState extends State<RecipeDiscoveryScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryOrange.withValues(alpha: 0.15),
+                      color: AppColors.primaryAccent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       recipe.category,
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryOrange),
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryAccent),
                     ),
                   ),
                   IconButton(
@@ -325,7 +328,7 @@ class _RecipeDiscoveryScreenState extends State<RecipeDiscoveryScreen> {
                   ),
                   Text(
                     '${recipe.caloriesPerServing.round()} kcal',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryOrange),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryAccent),
                   ),
                 ],
               ),

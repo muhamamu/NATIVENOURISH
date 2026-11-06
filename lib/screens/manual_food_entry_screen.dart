@@ -160,17 +160,17 @@ class _ManualFoodEntryScreenState extends State<ManualFoodEntryScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryOrange.withValues(alpha: 0.15),
+                            color: AppColors.primaryAccent.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.lock_rounded, size: 11, color: AppColors.primaryOrange),
+                              Icon(Icons.lock_rounded, size: 11, color: AppColors.primaryAccent),
                               SizedBox(width: 4),
                               Text(
                                 'ATWATER VERIFIED',
-                                style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primaryOrange),
+                                style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppColors.primaryAccent),
                               ),
                             ],
                           ),
@@ -190,7 +190,7 @@ class _ManualFoodEntryScreenState extends State<ManualFoodEntryScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStat('${cals.round()}', 'kcal', AppColors.primaryOrange),
+                        _buildStat('${cals.round()}', 'kcal', AppColors.primaryAccent),
                         _buildStat('${p.toStringAsFixed(1)}g', 'Protein', AppColors.accentGreen),
                         _buildStat('${c.toStringAsFixed(1)}g', 'Carbs', AppColors.accentBlue),
                         _buildStat('${f.toStringAsFixed(1)}g', 'Fat', AppColors.accentAmber),
@@ -261,14 +261,14 @@ class _ManualFoodEntryScreenState extends State<ManualFoodEntryScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryOrange.withValues(alpha: 0.08),
+                  color: AppColors.primaryAccent.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.primaryOrange.withValues(alpha: 0.25)),
+                  border: Border.all(color: AppColors.primaryAccent.withValues(alpha: 0.25)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.shield_outlined, color: AppColors.primaryOrange, size: 22),
+                    Icon(Icons.shield_outlined, color: AppColors.primaryAccent, size: 22),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -277,13 +277,13 @@ class _ManualFoodEntryScreenState extends State<ManualFoodEntryScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 'Scientific Calorie Calculation',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primaryOrange),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primaryAccent),
                               ),
                               Text(
                                 '${cals.round()} kcal',
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryOrange),
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.primaryAccent),
                               ),
                             ],
                           ),
@@ -365,7 +365,7 @@ class _ManualFoodEntryScreenState extends State<ManualFoodEntryScreen> {
                             return ChoiceChip(
                               label: Text(type),
                               selected: isSel,
-                              selectedColor: AppColors.primaryOrange.withValues(alpha: 0.2),
+                              selectedColor: AppColors.primaryAccent.withValues(alpha: 0.2),
                               onSelected: (val) {
                                 if (val) setState(() => _mealType = type);
                               },

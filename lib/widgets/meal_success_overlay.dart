@@ -100,7 +100,7 @@ class MealSuccessOverlay {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.primaryOrange,
+                      color: AppColors.primaryAccent,
                     ),
                   ),
                   Text(
@@ -120,7 +120,7 @@ class MealSuccessOverlay {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildStat('${calories.round()}', 'kcal', AppColors.primaryOrange),
+                        _buildStat('${calories.round()}', 'kcal', AppColors.primaryAccent),
                         _buildStat('${protein.round()}g', 'Protein', AppColors.accentGreen),
                         _buildStat('${carbs.round()}g', 'Carbs', AppColors.accentBlue),
                         _buildStat('${fat.round()}g', 'Fat', AppColors.accentAmber),
@@ -133,7 +133,7 @@ class MealSuccessOverlay {
                     height: 46,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryOrange,
+                        backgroundColor: AppColors.primaryAccentDark,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),
                       onPressed: () => Navigator.pop(context),
